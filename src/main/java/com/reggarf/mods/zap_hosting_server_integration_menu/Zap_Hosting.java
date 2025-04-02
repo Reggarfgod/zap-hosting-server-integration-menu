@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.config.ZHConfig;
-import com.reggarf.mods.zap_hosting_server_integration_menu.event.TopJoinMultiplayerImageEvent;
+import com.reggarf.mods.zap_hosting_server_integration_menu.event.ZHTopImageEvent;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
@@ -43,7 +43,7 @@ public class Zap_Hosting {
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(new TopJoinMultiplayerImageEvent());
+        MinecraftForge.EVENT_BUS.register(new ZHTopImageEvent());
 
         modEventBus.addListener(this::addCreative);
         registerConfig();

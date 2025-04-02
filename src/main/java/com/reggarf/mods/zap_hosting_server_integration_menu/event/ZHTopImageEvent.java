@@ -13,7 +13,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class TopJoinMultiplayerImageEvent {
+public class ZHTopImageEvent {
     private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/overlay_1.png");
     private static final int IMAGE_WIDTH = 225;
     private static final int IMAGE_HEIGHT = 31;
