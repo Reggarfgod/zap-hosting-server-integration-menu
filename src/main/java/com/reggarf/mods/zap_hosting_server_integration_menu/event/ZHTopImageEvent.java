@@ -14,7 +14,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ZHTopImageEvent {
-    private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/overlay_1.png");
+    private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/wo_bg_overlay_1.png");
     private static final int IMAGE_WIDTH = 225;
     private static final int IMAGE_HEIGHT = 31;
     private static final String LINK = Zap_Hosting.CONFIG.common.link;
@@ -36,7 +36,7 @@ public class ZHTopImageEvent {
             imageX = (screen.width - IMAGE_WIDTH) / 2;
             imageY = 1;
 
-            guiGraphics.fill(imageX - 2, imageY - 2, imageX + IMAGE_WIDTH + 2, imageY + IMAGE_HEIGHT + 2, 0x66000000);
+            //guiGraphics.fill(imageX - 2, imageY - 2, imageX + IMAGE_WIDTH + 2, imageY + IMAGE_HEIGHT + 2, 0x66000000);
 
             RenderSystem.setShaderTexture(0, IMAGE);
             guiGraphics.blit(IMAGE, imageX, imageY, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -53,7 +53,7 @@ public class ZHTopImageEvent {
 
             if (mouseX >= imageX && mouseX <= imageX + IMAGE_WIDTH &&
                     mouseY >= imageY && mouseY <= imageY + IMAGE_HEIGHT) {
-                guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click me to buy server"), (int) mouseX, (int) mouseY);
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click me to buy a server"), (int) mouseX, (int) mouseY);
             }
         }
     }

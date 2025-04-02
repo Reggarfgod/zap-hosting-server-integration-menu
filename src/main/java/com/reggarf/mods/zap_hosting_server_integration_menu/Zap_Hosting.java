@@ -3,7 +3,9 @@ package com.reggarf.mods.zap_hosting_server_integration_menu;
 import com.mojang.logging.LogUtils;
 
 
+
 import com.reggarf.mods.zap_hosting_server_integration_menu.config.ZHConfig;
+
 import com.reggarf.mods.zap_hosting_server_integration_menu.event.ZHTopImageEvent;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
@@ -44,6 +46,8 @@ public class Zap_Hosting {
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new ZHTopImageEvent());
+        //MinecraftForge.EVENT_BUS.register(new ZHMainMenuButton());
+        //MinecraftForge.EVENT_BUS.register(new ZHServerListOverlay());
 
         modEventBus.addListener(this::addCreative);
         registerConfig();
