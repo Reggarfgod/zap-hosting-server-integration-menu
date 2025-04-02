@@ -1,0 +1,8 @@
+{
+	// Enable or disable the welcome message
+	"enableOverlay": true,
+	// zap hosting link
+	"link": "https://zap-hosting.com/reggarf",
+	// Zap Code
+	"code": "REGGARF-1047"
+}
