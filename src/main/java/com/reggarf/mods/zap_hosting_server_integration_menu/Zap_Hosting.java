@@ -26,6 +26,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Mixins;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Zap_Hosting.MOD_ID)
@@ -46,8 +47,7 @@ public class Zap_Hosting {
 
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new ZHTopImageEvent());
-        //MinecraftForge.EVENT_BUS.register(new ZHMainMenuButton());
-        //MinecraftForge.EVENT_BUS.register(new ZHServerListOverlay());
+
 
         modEventBus.addListener(this::addCreative);
         registerConfig();
@@ -69,8 +69,6 @@ public class Zap_Hosting {
         CONFIG = AutoConfig.getConfigHolder(ZHConfig.class).getConfig();
 
     }
-
-
 
 
     private void commonSetup(final FMLCommonSetupEvent event) {

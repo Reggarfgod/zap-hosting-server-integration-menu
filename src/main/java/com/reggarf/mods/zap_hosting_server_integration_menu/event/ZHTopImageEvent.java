@@ -53,7 +53,7 @@ public class ZHTopImageEvent {
 
             if (mouseX >= imageX && mouseX <= imageX + IMAGE_WIDTH &&
                     mouseY >= imageY && mouseY <= imageY + IMAGE_HEIGHT) {
-                guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click me to buy a server"), (int) mouseX, (int) mouseY);
+                guiGraphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click me to get your own server"), (int) mouseX, (int) mouseY);
             }
         }
     }

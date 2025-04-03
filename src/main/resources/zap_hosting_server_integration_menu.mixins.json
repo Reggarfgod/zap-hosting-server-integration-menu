@@ -4,10 +4,10 @@
   "package": "com.reggarf.mods.zap_hosting_server_integration_menu.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "zap_hosting_server_integration_menu.refmap.json",
-  "mixins": ["JoinMultiplayerScreenMixin"
+  "mixins": [
+
   ],
-  "client": [
-  ],
+  "client": ["JoinMultiplayerScreenMixin"],
   "injectors": {
     "defaultRequire": 1
   }
