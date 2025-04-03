@@ -14,9 +14,9 @@
   </component>
   <component name="McpModuleSettings">
     <option name="mappingFile" value="D:\Download\MOD\Zap Hosting Server Integration Menu\build\createMcpToSrg\output.tsrg" />
-    <option name="mcpVersion" value="official_1.20.1" />
-    <option name="minecraftVersion" value="1.20.1" />
-    <option name="platformVersion" value="47.4.0" />
+    <option name="mcpVersion" value="official_1.20.3" />
+    <option name="minecraftVersion" value="1.20.3" />
+    <option name="platformVersion" value="49.0.2" />
     <option name="srgType" value="TSRG" />
   </component>
 </module>

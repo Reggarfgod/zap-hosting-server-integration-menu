@@ -15,13 +15,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ZHTopImageEvent {
     private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/wo_bg_overlay_1.png");
-    private static final int IMAGE_WIDTH = 225;
-    private static final int IMAGE_HEIGHT = 31;
+    private static final int IMAGE_WIDTH = 223;
+    private static final int IMAGE_HEIGHT = 29;
     private static final String LINK = Zap_Hosting.CONFIG.common.link;
 
     private static String playMultiplayerText = Zap_Hosting.CONFIG.common.code;
     private static int textX;
-    private static int textY = 25;
+    private static int textY = 23;
     private static float textSize = 0.8f;
 
     private int imageX, imageY;
