@@ -14,15 +14,18 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ZHTopImageEvent {
-    private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/wo_bg_overlay_1.png");
+    //private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/wo_bg_overlay_1.png");
+    private static final ResourceLocation IMAGE =
+            ResourceLocation.fromNamespaceAndPath(Zap_Hosting.MOD_ID,"textures/gui/wo_bg_overlay_1.png");
+
     private static final int IMAGE_WIDTH = 223;
     private static final int IMAGE_HEIGHT = 29;
     private static final String LINK = Zap_Hosting.CONFIG.common.link;
 
     private static String playMultiplayerText = Zap_Hosting.CONFIG.common.code;
     private static int textX;
-    private static int textY = 23;
-    private static float textSize = 0.8f;
+    private static int textY = 24;
+    private static float textSize = 0.7f;
 
     private int imageX, imageY;
 
@@ -41,7 +44,7 @@ public class ZHTopImageEvent {
             RenderSystem.setShaderTexture(0, IMAGE);
             guiGraphics.blit(IMAGE, imageX, imageY, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-            textX = ((screen.width - Minecraft.getInstance().font.width(playMultiplayerText)) / 2) + 5;
+            textX = ((screen.width - Minecraft.getInstance().font.width(playMultiplayerText)) / 2) + 9;
             guiGraphics.pose().pushPose();
             guiGraphics.pose().scale(textSize, textSize, textSize);
             guiGraphics.drawString(Minecraft.getInstance().font, playMultiplayerText, (int) (textX / textSize), (int) (textY / textSize), 0xFFFFFF, false);

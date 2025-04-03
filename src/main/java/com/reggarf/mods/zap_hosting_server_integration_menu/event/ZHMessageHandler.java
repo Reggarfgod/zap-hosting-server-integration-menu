@@ -50,7 +50,7 @@ public class ZHMessageHandler {
          //TextColor textColor = fromRgb(WFJMessage.CONFIG.common.welcomeMessageColor);
          //TextColor clickableTextColor = fromRgb(WFJMessage.CONFIG.common.clickableTextColor);
 
-        return Component.literal("If you're looking for a reliable game server, check out ZAP-Hosting! Use code "+Zap_Hosting.CONFIG.common.code+" for 20% off your order!")
+        return Component.literal(" If you're looking for a reliable game server, check out ZAP-Hosting! Use code "+Zap_Hosting.CONFIG.common.code+" for 20% off your order!")
                 .setStyle(Style.EMPTY.withColor(textColor)) // Main message color
                 .append(" ")
                 .append(Component.literal("[Click here]")
