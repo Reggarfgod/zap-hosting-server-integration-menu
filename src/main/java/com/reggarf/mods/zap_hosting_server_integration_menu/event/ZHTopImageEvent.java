@@ -9,14 +9,16 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+
 
 public class ZHTopImageEvent {
-    //private static final ResourceLocation IMAGE = new ResourceLocation("zap_hosting_server_integration_menu", "textures/gui/wo_bg_overlay_1.png");
+
     private static final ResourceLocation IMAGE =
             ResourceLocation.fromNamespaceAndPath(Zap_Hosting.MOD_ID,"textures/gui/wo_bg_overlay_1.png");
+
 
     private static final int IMAGE_WIDTH = 223;
     private static final int IMAGE_HEIGHT = 29;
@@ -25,12 +27,12 @@ public class ZHTopImageEvent {
     private static String playMultiplayerText = Zap_Hosting.CONFIG.common.code;
     private static int textX;
     private static int textY = 24;
-    private static float textSize = 0.7f;
+    private static float textSize = 0.8f;
 
     private int imageX, imageY;
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
-    public void onScreenRender(ScreenEvent.Render event) {
+    public void onScreenRender(ScreenEvent.Render.Post event) {
         if (!Zap_Hosting.CONFIG.common.enableOverlay) return;
 
         Screen screen = event.getScreen();
@@ -44,7 +46,7 @@ public class ZHTopImageEvent {
             RenderSystem.setShaderTexture(0, IMAGE);
             guiGraphics.blit(IMAGE, imageX, imageY, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-            textX = ((screen.width - Minecraft.getInstance().font.width(playMultiplayerText)) / 2) + 9;
+            textX = ((screen.width - Minecraft.getInstance().font.width(playMultiplayerText)) / 2) + 5;
             guiGraphics.pose().pushPose();
             guiGraphics.pose().scale(textSize, textSize, textSize);
             guiGraphics.drawString(Minecraft.getInstance().font, playMultiplayerText, (int) (textX / textSize), (int) (textY / textSize), 0xFFFFFF, false);

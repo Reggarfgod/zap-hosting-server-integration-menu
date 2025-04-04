@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zap-hosting-server-integration-menu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/zap-hosting-server-integration-menu.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zap-hosting-server-integration-menu.test.iml" filepath="$PROJECT_DIR$/.idea/modules/zap-hosting-server-integration-menu.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zap_hosting_server_integration_menu.main.iml" filepath="$PROJECT_DIR$/.idea/modules/zap_hosting_server_integration_menu.main.iml" />
     </modules>
   </component>
 </project>

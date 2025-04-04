@@ -1,22 +1,17 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.event;
 
-
-
-
 import com.reggarf.mods.zap_hosting_server_integration_menu.Zap_Hosting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import static net.minecraft.network.chat.TextColor.fromRgb;
 
 
-@Mod.EventBusSubscriber(modid = Zap_Hosting.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+
 public class ZHMessageHandler {
 
     @SubscribeEvent
@@ -50,7 +45,7 @@ public class ZHMessageHandler {
          //TextColor textColor = fromRgb(WFJMessage.CONFIG.common.welcomeMessageColor);
          //TextColor clickableTextColor = fromRgb(WFJMessage.CONFIG.common.clickableTextColor);
 
-        return Component.literal(" If you're looking for a reliable game server, check out ZAP-Hosting! Use code "+Zap_Hosting.CONFIG.common.code+" for 20% off your order!")
+        return Component.literal("If you're looking for a reliable game server, check out ZAP-Hosting! Use code "+Zap_Hosting.CONFIG.common.code+" for 20% off your order!")
                 .setStyle(Style.EMPTY.withColor(textColor)) // Main message color
                 .append(" ")
                 .append(Component.literal("[Click here]")

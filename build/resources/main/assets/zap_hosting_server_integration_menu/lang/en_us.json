@@ -1,0 +1,10 @@
+{
+  "text.autoconfig.zap_hosting_server_integration_menu.title": "Zap Hosting Config",
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.enableOverlay.@Tooltip": "Enable or disable in-game Overlay",
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.link.@Tooltip": "Partner LINK note: Restart the minecraft after changing",
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.code.@Tooltip": "Discount CODE note: Restart the minecraft after changing",
+
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.enableOverlay": "Enable or disable in-game Overlay",
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.link": "Partner LINK",
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.code": "Discount CODE"
+}
