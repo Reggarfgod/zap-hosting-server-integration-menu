@@ -6,5 +6,31 @@
 
   "text.autoconfig.zap_hosting_server_integration_menu.option.common.enableOverlay": "Enable or disable in-game Overlay",
   "text.autoconfig.zap_hosting_server_integration_menu.option.common.link": "Partner LINK",
-  "text.autoconfig.zap_hosting_server_integration_menu.option.common.code": "Discount CODE"
+  "text.autoconfig.zap_hosting_server_integration_menu.option.common.code": "Discount CODE",
+  "screen.config.title": "Create Your Minecraft Server",
+  "screen.config.playercount": "How many players do you expect to be on the server at once?",
+
+  "screen.config.Choose_plan_type": "Choose a Plan Type",
+  "screen.config.PremiumPlans": "Premium Plan",
+  "screen.config.AllBudgetFeatures": "✓ All Budget Features",
+  "screen.config.FreeDedicatedIP": "x Free Dedicated IP",
+  "screen.config.FreeUnlimitedSlots": "✓ Unlimited Slots",
+  "screen.config.MoreLocations": "✓ More Locations",
+  "screen.config.BudgetPlans": "Budget Plan",
+  "screen.config.InstantSetup": "✓ Instant Setup",
+  "screen.config.FreeMySQLDatabase": "✓ Free MySQL Database",
+  "screen.config.24/7Support": "✓ 24/7 Support",
+  "screen.config.FullFTPAccess": "✓ Full FTP Access",
+  "screen.config.UnlimitedNVMeSSDSpace": "✓ Unlimited NVMe SSD",
+  "screen.config.Free Modpack/ForgeInstallation": "✓ Free Modpack/Forge Setup",
+  "screen.config.Minecraft": "Minecraft",
+  "screen.config.Curse_Forge": "CurseForge",
+  "screen.config.Life_in_the_Woods": "Life in the Woods",
+  "screen.config.Feed_the_Beast": "Feed The Beast",
+  "screen.config.AT_Launcher": "ATLauncher",
+  "screen.config.Technic_Launcher": "Technic Launcher",
+  "screen.config.Voids_Wrath_Launcher": "Void's Wrath Launcher",
+  "screen.config.Minecraft_Minigames": "Minecraft Minigames",
+  "screen.config.Minecraft Adventure": "Minecraft Adventure",
+  "screen.config.Choose_Launcher": "Choose Your Launcher"
 }

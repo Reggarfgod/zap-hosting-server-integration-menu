@@ -24,6 +24,6 @@ forgedatauserdev
 zap_hosting_server_integration_menu
 --all
 --output
-"D:\\Download\\MOD\\Zap Hosting Server Integration Menu\\src\\generated\\resources"
+D:\\Download\\MOD\\zap-hosting-server-integration-menu\\src\\generated\\resources
 --existing
-"D:\\Download\\MOD\\Zap Hosting Server Integration Menu\\src\\main\\resources"
+D:\\Download\\MOD\\zap-hosting-server-integration-menu\\src\\main\\resources

@@ -105,4 +105,4 @@ C:\Users\Anoop Singh\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-tree\9.5
 C:\Users\Anoop Singh\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-util\9.5\64b5a1fc8c1b15ed2efd6a063e976bc8d3dc5ffe\asm-util-9.5.jar
 C:\Users\Anoop Singh\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm\9.5\dc6ea1875f4d64fbc85e1691c95b96a3d8569c90\asm-9.5.jar
 C:\Users\Anoop Singh\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api\2.0.9\7cf2726fdcfbc8610f9a71fb3ed639871f315340\slf4j-api-2.0.9.jar
-D:\Download\MOD\Zap Hosting Server Integration Menu\build\moddev\artifacts\neoforge-21.0.167-client-extra-aka-minecraft-resources.jar
+D:\Download\MOD\zap-hosting-server-integration-menu\build\moddev\artifacts\neoforge-21.0.167-client-extra-aka-minecraft-resources.jar

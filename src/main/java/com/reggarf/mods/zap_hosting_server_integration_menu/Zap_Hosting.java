@@ -29,7 +29,9 @@ import static net.neoforged.neoforge.common.NeoForge.EVENT_BUS;
 public class Zap_Hosting {
     public static final String MOD_ID = "zap_hosting_server_integration_menu";
     public static ZHConfig CONFIG;
+
     public Zap_Hosting(IEventBus modEventBus, ModContainer modContainer) {
+
         EVENT_BUS.register(this);
         init();
         modEventBus.addListener(this::addCreative);
@@ -41,7 +43,13 @@ public class Zap_Hosting {
             return AutoConfig.getConfigScreen(ZHConfig.class, parent).get();
         });
 
+
     }
+
+
+
+
+
     public static void init() {
         AutoConfig.register(ZHConfig.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
         CONFIG = AutoConfig.getConfigHolder(ZHConfig.class).getConfig();
