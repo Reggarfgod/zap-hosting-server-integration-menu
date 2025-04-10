@@ -36,11 +36,6 @@ public class ZHConfig extends PartitioningSerializer.GlobalData {
         @ConfigEntry.Gui.Tooltip
         @Comment("Zap Code")
         public String code = "REGGARF-1047";
-
-        @ConfigEntry.Gui.Tooltip
-        @Comment("Zap Code")
-        public String serverIP = "REGGARF-1047";
-
     }
 
 //    @Config(name = "client")

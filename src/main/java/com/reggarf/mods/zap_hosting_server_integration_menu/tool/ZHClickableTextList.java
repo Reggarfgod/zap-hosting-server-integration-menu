@@ -20,6 +20,13 @@ public class ZHClickableTextList extends AbstractWidget {
     private final Font font;
     private int selectedIndex = -1;
     private final Map<Component, ResourceLocation> imageMap = new HashMap<>();
+    private final Map<Component, String> componentKeyMap = new HashMap<>();
+
+    public interface ItemClickListener {
+        void onClick(String key);
+    }
+
+    private ItemClickListener itemClickListener;
 
     public ZHClickableTextList(int x, int y, int width, int height, List<Component> items) {
         super(x, y, width, height, Component.empty());
@@ -29,6 +36,14 @@ public class ZHClickableTextList extends AbstractWidget {
 
     public void setImageForEntry(Component entry, ResourceLocation image) {
         this.imageMap.put(entry, image);
+    }
+
+    public void setKeyForEntry(Component entry, String key) {
+        this.componentKeyMap.put(entry, key);
+    }
+
+    public void setItemClickListener(ItemClickListener listener) {
+        this.itemClickListener = listener;
     }
 
     @Override
@@ -45,14 +60,12 @@ public class ZHClickableTextList extends AbstractWidget {
             boolean hovered = mouseX >= getX() && mouseX <= getX() + getWidth()
                     && mouseY >= itemY && mouseY <= itemY + itemHeight;
 
-            // Background
             if (index == selectedIndex) {
                 graphics.fill(getX(), itemY, getX() + getWidth(), itemY + itemHeight, 0xFF777777);
             } else if (hovered) {
                 graphics.fill(getX(), itemY, getX() + getWidth(), itemY + itemHeight, 0xFF555555);
             }
 
-            // Draw icon if available
             ResourceLocation icon = imageMap.get(entry);
             int iconSize = 16;
             int textOffsetX = getX() + 5;
@@ -65,7 +78,6 @@ public class ZHClickableTextList extends AbstractWidget {
             graphics.drawString(font, entry, textOffsetX, itemY + 5, textColor);
         }
 
-        // Scrollbar rendering
         if (items.size() * itemHeight > height) {
             int maxScroll = Math.max(1, items.size() - visibleCount);
             int scrollbarHeight = Math.max(10, (int) ((float) visibleCount / items.size() * height));
@@ -109,14 +121,17 @@ public class ZHClickableTextList extends AbstractWidget {
 
     private void onItemClick(int index) {
         selectedIndex = index;
-        Minecraft.getInstance().player.sendSystemMessage(
-                Component.literal("Clicked: " + items.get(index).getString())
-        );
-        // TODO: Add your actual logic here
+        Component entry = items.get(index);
+        if (itemClickListener != null) {
+            String key = componentKeyMap.get(entry);
+            if (key != null) {
+                itemClickListener.onClick(key);
+            }
+        }
     }
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-        // Optional: accessibility support
+        // Accessibility support (optional)
     }
 }

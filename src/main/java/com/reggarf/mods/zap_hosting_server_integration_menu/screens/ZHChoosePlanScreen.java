@@ -13,8 +13,11 @@ import java.util.List;
 
 public class ZHChoosePlanScreen extends Screen {
 
-    public ZHChoosePlanScreen() {
+    private final String launcherKey;
+
+    public ZHChoosePlanScreen(String launcherKey) {
         super(Component.literal("Choose Plan Type"));
+        this.launcherKey = launcherKey;
     }
 
     @Override
@@ -29,13 +32,13 @@ public class ZHChoosePlanScreen extends Screen {
 
         // Choose Premium button
         this.addRenderableWidget(Button.builder(Component.literal("Choose Premium"), b -> {
-            Minecraft.getInstance().setScreen(new ZHPremiumPlanScreen());
-        }).pos(centerX - 160, centerY + 70).size(120, 20).build());
+            Minecraft.getInstance().setScreen(new ZHPremiumPlanScreen(launcherKey));
+        }).pos(centerX - 160, centerY + 60).size(120, 20).build());
 
         // Choose Budget button
         this.addRenderableWidget(Button.builder(Component.literal("Choose Budget"), b -> {
-            Minecraft.getInstance().setScreen(new ZHBudgetPlanScreen());
-        }).pos(centerX + 40, centerY + 70).size(120, 20).build());
+            Minecraft.getInstance().setScreen(new ZHBudgetPlanScreen(launcherKey));
+        }).pos(centerX + 40, centerY + 60).size(120, 20).build());
 
         // Scrollable text boxes (without titles)
         int boxWidth = 150;
@@ -46,10 +49,10 @@ public class ZHChoosePlanScreen extends Screen {
                 centerX - 160, boxY,
                 boxWidth, boxHeight,
                 List.of(
-                        Component.translatable("screen.config.AllBudgetFeatures"),
-                        Component.translatable("screen.config.FreeDedicatedIP"),
-                        Component.translatable("screen.config.FreeUnlimitedSlots"),
-                        Component.translatable("screen.config.MoreLocations")
+                        Component.translatable("screen.config.1"),
+                        Component.translatable("screen.config.2"),
+                        Component.translatable("screen.config.3"),
+                        Component.translatable("screen.config.4")
                 )
         ));
 
@@ -57,12 +60,12 @@ public class ZHChoosePlanScreen extends Screen {
                 centerX + 40, boxY,
                 boxWidth, boxHeight,
                 List.of(
-                        Component.translatable("screen.config.InstantSetup"),
-                        Component.translatable("screen.config.FreeMySQLDatabase"),
-                        Component.translatable("screen.config.24/7Support"),
-                        Component.translatable("screen.config.FullFTPAccess"),
-                        Component.translatable("screen.config.UnlimitedNVMeSSDSpace"),
-                        Component.translatable("screen.config.Free Modpack/ForgeInstallation")
+                        Component.translatable("screen.config.1.1"),
+                        Component.translatable("screen.config.1.2"),
+                        Component.translatable("screen.config.1.3"),
+                        Component.translatable("screen.config.1.4"),
+                        Component.translatable("screen.config.1.5"),
+                        Component.translatable("screen.config.1.6")
                 )
         ));
     }
@@ -88,7 +91,6 @@ public class ZHChoosePlanScreen extends Screen {
         graphics.drawCenteredString(this.font,
                 Component.translatable("screen.config.BudgetPlans").copy().withStyle(style -> style.withBold(true)),
                 this.width / 2 + 40 + (boxWidth / 2), boxY - 20, 0xFFFFFF);
-
 
         // Background boxes
         graphics.fill(this.width / 2 - 160 - boxPadding, boxY - boxPadding,

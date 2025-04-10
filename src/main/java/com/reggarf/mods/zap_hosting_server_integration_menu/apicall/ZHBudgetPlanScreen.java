@@ -1,5 +1,6 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.apicall;
 
+import com.reggarf.mods.zap_hosting_server_integration_menu.Zap_Hosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.screens.ZHChoosePlanScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -13,11 +14,14 @@ import java.net.URI;
 
 public class ZHBudgetPlanScreen extends Screen {
 
+    private final String launcherKey; // e.g., "curseforge"
     private PlanSlider slider;
     private String selectedPlan = "Budget Plan - 6GB RAM $17.94/Month";
 
-    public ZHBudgetPlanScreen() {
+    // Constructor to accept launcher key
+    public ZHBudgetPlanScreen(String launcherKey) {
         super(Component.literal("Let's create your Minecraft Server."));
+        this.launcherKey = launcherKey;
     }
 
     @Override
@@ -32,13 +36,11 @@ public class ZHBudgetPlanScreen extends Screen {
         // Order Button
         addRenderableWidget(Button.builder(Component.literal("Order Plan"), b -> {
             try {
-                String url = switch (selectedPlan) {
-                    case "Budget Plan - 4GB RAM $9.99/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    case "Budget Plan - 6GB RAM $17.94/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    case "Budget Plan - 8GB RAM $22.99/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    default -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                };
-                Util.getPlatform().openUri(new URI(url));
+                // Construct final URL with launcher key
+                String base = "https://zap-hosting.com/en/shop/product/cloud-gameserver/";
+                String finalUrl = base + launcherKey + "/?ref="+Zap_Hosting.CONFIG.common.link;
+
+                Util.getPlatform().openUri(new URI(finalUrl));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -46,7 +48,7 @@ public class ZHBudgetPlanScreen extends Screen {
 
         // Back Button
         addRenderableWidget(Button.builder(Component.literal("Back"), b -> {
-            Minecraft.getInstance().setScreen(new ZHChoosePlanScreen());
+            Minecraft.getInstance().setScreen(new ZHChoosePlanScreen(launcherKey));
         }).bounds(centerX - 40, centerY + 70, 80, 20).build());
     }
 

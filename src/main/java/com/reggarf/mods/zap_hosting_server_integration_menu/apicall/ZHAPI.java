@@ -17,7 +17,7 @@ public class ZHAPI {
     public static CompletableFuture<List<String>> fetchModpacks() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                URL url = new URL("https://zap-hosting.com/en/shop/product/cloud-gameserver/"); // Adjust if needed
+                URL url = new URL("apiurl"); // Adjust if needed
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
 

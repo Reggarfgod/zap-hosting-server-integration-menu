@@ -52,6 +52,7 @@ public class ZHPlayerSlot extends Screen {
         graphics.drawCenteredString(this.font, Component.translatable("screen.config.title"), this.width / 2, 20, 0xFFFFFF);
         graphics.drawCenteredString(this.font, Component.translatable("screen.config.playercount"), this.width / 2, 90, 0xFFFFFF);
     }
+
     // Custom slider class
     private class PlayerCountSlider extends AbstractSliderButton {
 

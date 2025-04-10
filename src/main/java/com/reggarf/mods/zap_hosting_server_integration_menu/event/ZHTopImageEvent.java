@@ -111,7 +111,7 @@ public class ZHTopImageEvent {
             if (mouseX >= imageX && mouseX <= imageX + IMAGE_WIDTH &&
                     mouseY >= imageY && mouseY <= imageY + IMAGE_HEIGHT &&
                     event.getButton() == 0) {
-                Minecraft.getInstance().setScreen(new ZHPlayerSlot());
+                Minecraft.getInstance().setScreen(new ZHChooseLauncherScreen());
                 event.setCanceled(true);
             }
         }

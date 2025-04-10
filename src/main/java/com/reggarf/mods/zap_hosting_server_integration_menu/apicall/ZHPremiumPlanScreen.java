@@ -1,5 +1,6 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.apicall;
 
+import com.reggarf.mods.zap_hosting_server_integration_menu.Zap_Hosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.screens.ZHChoosePlanScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -15,9 +16,11 @@ public class ZHPremiumPlanScreen extends Screen {
 
     private PlanSlider slider;
     private String selectedPlan = "Premium Plan - 8GB RAM $39.92/Month";
+    private final String launcherKey;
 
-    public ZHPremiumPlanScreen() {
+    public ZHPremiumPlanScreen(String launcherKey) {
         super(Component.literal("Let's create your Minecraft Server."));
+        this.launcherKey = launcherKey;
     }
 
     @Override
@@ -32,13 +35,7 @@ public class ZHPremiumPlanScreen extends Screen {
         // Order button
         addRenderableWidget(Button.builder(Component.literal("Order Plan"), b -> {
             try {
-                String url = switch (selectedPlan) {
-                    case "Budget Plan - 4GB RAM $9.99/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    case "Standard Plan - 6GB RAM $19.99/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    case "Premium Plan - 8GB RAM $39.92/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    case "Ultimate Plan - 12GB RAM $59.99/Month" -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                    default -> "https://zap-hosting.com/en/shop/product/cloud-gameserver/minecraft/";
-                };
+                String url = "https://zap-hosting.com/en/shop/product/cloud-gameserver/" + launcherKey + "/?ref="+Zap_Hosting.CONFIG.common.link;
                 Util.getPlatform().openUri(new URI(url));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -47,7 +44,7 @@ public class ZHPremiumPlanScreen extends Screen {
 
         // Back button
         addRenderableWidget(Button.builder(Component.literal("Back"), b -> {
-            Minecraft.getInstance().setScreen(new ZHChoosePlanScreen());
+            Minecraft.getInstance().setScreen(new ZHChoosePlanScreen(launcherKey));
         }).bounds(centerX - 40, centerY + 70, 80, 20).build());
     }
 
@@ -65,10 +62,10 @@ public class ZHPremiumPlanScreen extends Screen {
     private class PlanSlider extends AbstractSliderButton {
 
         private final String[] plans = {
-                "Budget Plan - 4GB RAM $9.99/Month",
-                "Standard Plan - 6GB RAM $19.99/Month",
+                "Premium Plan - 4GB RAM $9.99/Month",
+                "Premium Plan - 6GB RAM $19.99/Month",
                 "Premium Plan - 8GB RAM $39.92/Month",
-                "Ultimate Plan - 12GB RAM $59.99/Month"
+                "Premium Plan - 12GB RAM $59.99/Month"
         };
 
         public PlanSlider(int x, int y, int width, int height) {
