@@ -1,39 +1,22 @@
 # ZAP-Hosting In-Game Server Integration Mod
 
-**Prepared for:** Marvin & the ZAP-Hosting Team  
-**Author / Developer:** Reggarf  
-**Target Platform:** Minecraft NeoForge & Forge (1.20.x / 1.21.x)  
-**Repository:** [Reggarfgod/zap-hosting-server-integration-menu](https://github.com/Reggarfgod/zap-hosting-server-integration-menu)
-
----
-
-## 1. Executive Summary
-
-The **ZAP-Hosting Server Integration Mod** is an in-game integration designed to seamlessly bridge Minecraft players and modpack users directly to ZAP-Hosting services. 
-
-Instead of forcing players to leave their client, open external browsers, manually search through complex server configurators, or lose their partner voucher codes, this mod embeds a **native, 10-step server configuration wizard**, **live ping test tool**, **multiplayer menu banners**, and **first-time player welcome overlay** directly inside the Minecraft user interface.
-
-Every server order configured inside Minecraft automatically carries the creator's partner/affiliate voucher code (e.g. `REGGARF-1047`) and directly fills the official ZAP-Hosting checkout web cart with 100% accurate pre-configured parameters.
-
----
-
 ## 2. Visual Walkthrough & Core Features
 
-### 🎁 1. In-Game First-Time Welcome Popup
+### 1. In-Game First-Time Welcome Popup
 When players boot a modpack or join a server for the first time, a polished welcome dialog appears with instant partner branding, one-click voucher copying, direct access to the in-game configurator, and a "Don't show this again" option.
 
 ![In-Game Welcome Popup](docs/images/00_welcome_popup.png)
 
 ---
 
-### 🌐 2. Multiplayer Menu Banner Integration
+### 2. Multiplayer Menu Banner Integration
 A clean, non-intrusive banner entry integrated directly into Minecraft's multiplayer server selection screen, inviting players who need a server to launch the wizard with a single click.
 
 ![Multiplayer Menu Banner](docs/images/11_multiplayer_banner.png)
 
 ---
 
-### 🛠️ 3. 10-Step Native In-Game Server Configurator
+### 3. 10-Step Native In-Game Server Configurator
 
 #### Step 1: Platform & Launcher Selection
 Select between popular launcher formats including CurseForge/Twitch, FTB, Vanilla Minecraft, ATLauncher, Technic, VPS, and Dedicated Servers with live starting prices.
@@ -108,40 +91,4 @@ Modpack developers or network operators can feature an official multiplayer serv
 
 ![Config Screen - Public Multiplayer Server](docs/images/14_config_public_server.png)
 
----
 
-## 3. Technical Architecture & Dedicated Server Safety
-
-- **Dist-Clean Architecture:** Strictly isolates client GUI and rendering classes (`ZHClientSetup`, `ZHClientTicker`, screens) from common code. Dedicated servers run headless with zero classloading errors.
-- **Optional Payload Networking:** Uses NeoForge's 1.21 `CustomPacketPayload` (`ZHWelcomePopupPayload`) registered as `.optional()` so vanilla clients or servers without the mod never experience connection errors or handshake failures.
-- **Persistent Player Data:** Server-side tracking via player persistent NBT (`hasJoinedBefore`) ensures the welcome popup only triggers once per player per world or server.
-- **Background Live Data Provider (`ZHLiveDataProvider`):** Asynchronously fetches and parses real-time pricing and options with offline fallback defaults to guarantee 0 UI latency.
-
----
-
-## 4. Testing & Verification
-
-The mod has undergone extensive testing across all key environments:
-
-| Test Scenario | Verification Status | Notes |
-| :--- | :--- | :--- |
-| **Client Singleplayer (1.21.1)** | ✅ Verified | First-join popup triggers smoothly after world load; banner renders cleanly in multiplayer menu. |
-| **Dedicated Server (Headless Linux/Windows)** | ✅ Verified | Tested with `./gradlew runServer --nogui`. Zero client classloading crashes; no GUI classes loaded server-side. |
-| **Network Payload Handshake** | ✅ Verified | Registered via `RegisterPayloadHandlersEvent` as `.optional()`. Unmodded vanilla clients can join without disconnects. |
-| **Player Persistence Tracking** | ✅ Verified | Tested server re-joins; persistent player NBT prevents popup spam on subsequent joins. |
-| **Live Web Scraping & Cart Link Generation** | ✅ Verified | Live price fallback verified; generated URLs open with all 10 config attributes and voucher code pre-filled. |
-| **In-Game Config GUI** | ✅ Verified | Both "Affiliate & Promo" and "Public Multiplayer Server" tabs load, persist changes to config JSON, and allow live preview. |
-
----
-
-## 5. Value Proposition for ZAP-Hosting
-
-1. **Eliminate Funnel Drop-off:** Configured within Minecraft's native aesthetic, drastically increasing completion and checkout rates compared to external web forms.
-2. **Turnkey Solution for Modpack Creators:** Modpack developers can include this mod out-of-the-box, providing a high-converting affiliate channel for their communities.
-3. **Official Partnership Opportunities:**
-   - **Direct Partner API Integration:** Hook into an authenticated ZAP-Hosting JSON catalog endpoint for dynamic pricing updates and new product listings.
-   - **In-Game Server Management:** Enable players to link their ZAP-Hosting account to view server metrics and execute Start/Stop/Restart commands right from Minecraft.
-
----
-
-*For inquiries, live demos, or code review, please reach out via GitHub or Discord.*
