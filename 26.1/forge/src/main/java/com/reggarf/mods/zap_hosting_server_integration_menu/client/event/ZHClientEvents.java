@@ -1,7 +1,7 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.client.event;
 
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 
 /**
  * Previously rendered a top banner overlay at the top of the multiplayer screen.

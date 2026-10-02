@@ -3,7 +3,7 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.event;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.ZHClientSetup;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 
 import javax.annotation.Nullable;
 
@@ -17,10 +17,6 @@ public class ZHClientTicker {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
         if (!pendingWelcomeScreen) {
             return;
         }
