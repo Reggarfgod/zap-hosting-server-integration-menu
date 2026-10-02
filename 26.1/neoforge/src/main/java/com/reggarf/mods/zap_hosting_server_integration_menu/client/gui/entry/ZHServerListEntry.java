@@ -56,6 +56,9 @@ public class ZHServerListEntry extends ServerSelectionList.OnlineServerEntry {
         if (isSelected) {
             guiGraphics.fill(rowLeft - 2, top - 2, rowLeft + rowWidth + 2, top + height + 2, 0xFFFFFFFF);
             guiGraphics.fill(rowLeft - 1, top - 1, rowLeft + rowWidth + 1, top + height + 1, 0xFF000000);
+        } else if (hovering) {
+            guiGraphics.fill(rowLeft - 2, top - 2, rowLeft + rowWidth + 2, top + height + 2, 0x80FFFFFF);
+            guiGraphics.fill(rowLeft - 1, top - 1, rowLeft + rowWidth + 1, top + height + 1, 0xFF000000);
         }
 
         int bannerX = rowLeft + (rowWidth - BANNER_WIDTH) / 2;
@@ -69,6 +72,19 @@ public class ZHServerListEntry extends ServerSelectionList.OnlineServerEntry {
                 BANNER_WIDTH, BANNER_HEIGHT,
                 BANNER_WIDTH, BANNER_HEIGHT
         );
+
+        // Banner text
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(bannerX + 53, bannerY + 1);
+        guiGraphics.pose().scale(0.85f, 0.85f);
+
+        // Line 1: Need a Server?
+        guiGraphics.text(this.minecraft.font, "Need a Server?", 8, 6, 0xFFFFFFFF, false);
+
+        // Line 2: Click me to get your own server!
+        guiGraphics.text(this.minecraft.font, "Click me to get your own server!", 8, 18, 0xFF5CB85C, false);
+
+        guiGraphics.pose().popMatrix();
     }
 
     @Override
@@ -80,14 +96,21 @@ public class ZHServerListEntry extends ServerSelectionList.OnlineServerEntry {
         int top = this.topPos;
         int height = this.heightPos;
 
-        if (mouseX >= rowLeft && mouseX <= rowLeft + rowWidth && mouseY >= top && mouseY <= top + height) {
+        if (event.button() == 0) {
+            int bannerX = rowLeft + (rowWidth - BANNER_WIDTH) / 2;
+            int bannerY = top + (height - BANNER_HEIGHT) / 2;
+            boolean clickedBanner = mouseX >= bannerX && mouseX <= bannerX + BANNER_WIDTH
+                    && mouseY >= bannerY && mouseY <= bannerY + BANNER_HEIGHT;
+
+            boolean wasSelected = this.list.getSelected() == this;
             this.list.setSelected(this);
 
-            long currentTime = Util.getMillis();
-            if (currentTime - this.lastClickTime < 250L) {
+            long now = Util.getMillis();
+            if (clickedBanner || wasSelected || doubleClick || (now - this.lastClickTime < 300L)) {
                 join();
+                return true;
             }
-            this.lastClickTime = currentTime;
+            this.lastClickTime = now;
             return true;
         }
         return false;
@@ -95,6 +118,6 @@ public class ZHServerListEntry extends ServerSelectionList.OnlineServerEntry {
 
     @Override
     public Component getNarration() {
-        return Component.translatable("narrator.select", "ZAP-Hosting Server Integration Banner");
+        return Component.literal("Need a Server? Click me to get your own server!");
     }
 }
