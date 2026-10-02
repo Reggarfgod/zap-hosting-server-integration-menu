@@ -1,0 +1,76 @@
+plugins {
+    id 'dev.architectury.loom' version '1.7-SNAPSHOT'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-fabric-1.20.1"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_version_1_20 as int)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = project.java_version_1_20 as int
+}
+
+def java17Launcher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(project.java_version_1_20 as int)
+}
+
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = java17Launcher
+}
+
+sourceSets.main.resources {
+    srcDir project(':common').file('src/main/resources')
+}
+
+tasks.withType(ProcessResources).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://maven.terraformersmc.com/" }
+    maven {
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version_1_20}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version_1_20}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version_1_20}"
+    modCompileOnly "com.terraformersmc:modmenu:7.2.2"
+
+    implementation project(':common')
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation("io.github.llamalad7:mixinextras-fabric:0.4.1")
+    annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.4.1")
+}
+
+processResources {
+    var replaceProperties = [
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            mod_description: mod_description,
+            mod_license: mod_license
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['fabric.mod.json', 'pack.mcmeta']) {
+        expand replaceProperties
+    }
+}

@@ -1,0 +1,68 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-fabric-26.1"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_version_26 as int)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = project.java_version_26 as int
+}
+
+sourceSets.main.resources {
+    srcDir project(':common').file('src/main/resources')
+}
+
+tasks.withType(ProcessResources).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://maven.terraformersmc.com/" }
+    maven {
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    // 26.1 Minecraft client jar & libraries
+    compileOnly files("${System.getProperty('user.home')}/.gradle/caches/forge_gradle/minecraft_repo/versions/26.1.2/client.jar")
+    
+    compileOnly "net.fabricmc:fabric-loader:${fabric_loader_version_26}"
+    compileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_api_version_26}"
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+
+    implementation project(':common')
+
+    compileOnly "io.github.llamalad7:mixinextras-common:0.4.1"
+    compileOnly "io.github.llamalad7:mixinextras-fabric:0.4.1"
+}
+
+processResources {
+    var replaceProperties = [
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            mod_description: mod_description,
+            mod_license: mod_license
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['fabric.mod.json', 'pack.mcmeta']) {
+        expand replaceProperties
+    }
+}

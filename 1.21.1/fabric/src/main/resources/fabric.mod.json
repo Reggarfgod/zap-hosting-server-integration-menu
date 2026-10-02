@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_authors}"
+  ],
+  "contact": {
+    "homepage": "https://zap-hosting.com"
+  },
+  "license": "${mod_license}",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting"
+    ],
+    "client": [
+      "com.reggarf.mods.zap_hosting_server_integration_menu.client.ZHClientSetup"
+    ],
+    "modmenu": [
+      "com.reggarf.mods.zap_hosting_server_integration_menu.client.ZHModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "zap_hosting_server_integration_menu.mixins.json",
+    "zap_hosting_server_integration_menu.fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

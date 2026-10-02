@@ -1,0 +1,79 @@
+plugins {
+    id 'dev.architectury.loom' version '1.7-SNAPSHOT'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-forge-1.20.1"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_version_1_20 as int)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = project.java_version_1_20 as int
+}
+
+def java17Launcher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(project.java_version_1_20 as int)
+}
+
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = java17Launcher
+}
+
+loom {
+    forge {
+        mixinConfig "zap_hosting_server_integration_menu.mixins.json"
+    }
+}
+
+sourceSets.main.resources {
+    srcDir project(':common').file('src/main/resources')
+}
+
+tasks.withType(ProcessResources).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.minecraftforge.net/" }
+    maven {
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version_1_20}"
+    mappings loom.officialMojangMappings()
+    forge "net.minecraftforge:forge:${minecraft_version_1_20}-${forge_version_1_20}"
+
+    implementation project(':common')
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
+    modImplementation("io.github.llamalad7:mixinextras-forge:0.4.1")
+}
+
+processResources {
+    var replaceProperties = [
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            mod_description: mod_description,
+            mod_license: mod_license
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties
+    }
+}
