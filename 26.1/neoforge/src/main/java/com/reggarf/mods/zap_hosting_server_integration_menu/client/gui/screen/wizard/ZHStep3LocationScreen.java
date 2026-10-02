@@ -2,7 +2,8 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -57,7 +58,7 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
         int pingBtnY = this.height - 52;
 
         pingCheckButton = new ZHCustomButton(pingBtnX, pingBtnY, pingBtnW, pingBtnH,
-                Component.literal("Ping-check 🚀"),
+                Component.literal("Ping-check \ud83d\ude80"),
                 b -> runPingCheck(),
                 ZHCustomButton.Style.ACTION);
         addRenderableWidget(pingCheckButton);
@@ -92,7 +93,7 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
             } finally {
                 isPinging = false;
                 if (pingCheckButton != null) {
-                    pingCheckButton.setMessage(Component.literal("Ping-check 🚀"));
+                    pingCheckButton.setMessage(Component.literal("Ping-check \ud83d\ude80"));
                     pingCheckButton.active = true;
                 }
             }
@@ -124,7 +125,6 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
             }
         }
 
-        // Fallback realistic region ping if socket ping fails
         return switch (region) {
             case "EUROPE (EU)" -> 25 + (long) (Math.random() * 15);
             case "AMERICA" -> 85 + (long) (Math.random() * 25);
@@ -135,25 +135,22 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int listY = 44;
-        int listH = this.height - listY - 58; // Leaves space for legend + ping button and bottom bar
+        int listH = this.height - listY - 58;
         int listW = Math.min(340, this.width - 20);
         int listX = centerX - listW / 2;
 
-        // Container frame
         graphics.fill(listX, listY, listX + listW, listY + listH, 0xDD1E2325);
-        graphics.renderOutline(listX, listY, listW, listH, 0xFF353A3D);
+        graphics.outline(listX, listY, listW, listH, 0xFF353A3D);
 
-        // Calculate total content height for regions + locations
         int totalRows = locations.size() / 2 + (locations.size() % 2 == 0 ? 0 : 1);
         int maxOffset = Math.max(0, (totalRows * ITEM_HEIGHT) - (listH - 10));
         scrollOffset = Mth.clamp(scrollOffset, 0, maxOffset);
 
-        // Enable scissor clipping so nothing overflows outside the list area
         graphics.enableScissor(listX + 1, listY + 1, listX + listW - 1, listY + listH - 1);
 
         int cardW = (listW - 20) / 2;
@@ -165,10 +162,8 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
         for (int i = 0; i < locations.size(); i += 2) {
             int currentY = listY + 6 + (row * ITEM_HEIGHT) - scrollOffset;
 
-            // Render col 1
             renderLocationCard(graphics, locations.get(i), i, leftX, currentY, cardW, cardH, mouseX, mouseY, listY, listH);
 
-            // Render col 2
             if (i + 1 < locations.size()) {
                 renderLocationCard(graphics, locations.get(i + 1), i + 1, rightX, currentY, cardW, cardH, mouseX, mouseY, listY, listH);
             }
@@ -178,19 +173,17 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
 
         graphics.disableScissor();
 
-        // Scrollbar
         if (maxOffset > 0) {
             int barH = Math.max(16, (listH * listH) / (totalRows * ITEM_HEIGHT));
             int barY = listY + (scrollOffset * (listH - barH)) / maxOffset;
             graphics.fill(listX + listW - 4, barY, listX + listW - 1, barY + barH, COLOR_ZAP_GREEN);
         }
 
-        // Protection note on the left, aligned with Ping-check button on the right
-        String legend = (listW >= 320) ? "🛡 PletX: Low latency  •  🛡 OVH: Backbone" : "🛡 PletX / OVH Protected";
-        graphics.drawString(this.font, legend, listX + 2, this.height - 47, 0xFFAAAAAA);
+        String legend = (listW >= 320) ? "\ud83d\udee1 PletX: Low latency  \u2022  \ud83d\udee1 OVH: Backbone" : "\ud83d\udee1 PletX / OVH Protected";
+        graphics.text(this.font, legend, listX + 2, this.height - 47, 0xFFAAAAAA);
     }
 
-    private void renderLocationCard(GuiGraphics graphics, ZHLiveDataProvider.LocationEntry loc, int index, int x, int y, int width, int height, int mouseX, int mouseY, int listY, int listH) {
+    private void renderLocationCard(GuiGraphicsExtractor graphics, ZHLiveDataProvider.LocationEntry loc, int index, int x, int y, int width, int height, int mouseX, int mouseY, int listY, int listH) {
         if (y + height < listY || y > listY + listH) return;
 
         boolean selected = loc.siteId().equals(config.locationId);
@@ -198,16 +191,13 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
 
         drawCard(graphics, x, y, width, height, selected, hovered);
 
-        // Flag badge
         graphics.fill(x + 4, y + 4, x + 18, y + height - 4, 0xFF3E4446);
-        graphics.drawString(this.font, loc.countryCode(), x + 5, y + 6, 0xFFFFFFFF);
+        graphics.text(this.font, loc.countryCode(), x + 5, y + 6, 0xFFFFFFFF);
 
-        // Shorten name if needed
         String name = loc.name();
         if (name.length() > 16) name = name.substring(0, 15) + "..";
-        graphics.drawString(this.font, name, x + 22, y + 4, selected ? 0xFFFFFFFF : 0xFFCCCCCC);
+        graphics.text(this.font, name, x + 22, y + 4, selected ? 0xFFFFFFFF : 0xFFCCCCCC);
 
-        // Ping & Protection
         String ping;
         synchronized (pingResults) {
             ping = index < pingResults.size() ? pingResults.get(index) : "40 ms";
@@ -220,7 +210,7 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
             }
         } catch (Exception ignored) {}
 
-        graphics.drawString(this.font, ping + " • " + loc.protectionType(), x + 22, y + 13, pingColor);
+        graphics.text(this.font, ping + " \u2022 " + loc.protectionType(), x + 22, y + 13, pingColor);
     }
 
     @Override
@@ -239,40 +229,43 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int centerX = this.width / 2;
-        int listY = 44;
-        int listH = this.height - listY - 58;
-        int listW = Math.min(340, this.width - 20);
-        int listX = centerX - listW / 2;
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
+            int centerX = this.width / 2;
+            int listY = 44;
+            int listH = this.height - listY - 58;
+            int listW = Math.min(340, this.width - 20);
+            int listX = centerX - listW / 2;
 
-        if (mouseX >= listX && mouseX <= listX + listW && mouseY >= listY && mouseY <= listY + listH) {
-            int cardW = (listW - 20) / 2;
-            int cardH = 24;
-            int leftX = listX + 6;
-            int rightX = listX + 12 + cardW;
+            double mouseX = event.x();
+            double mouseY = event.y();
 
-            int row = 0;
-            for (int i = 0; i < locations.size(); i += 2) {
-                int currentY = listY + 6 + (row * ITEM_HEIGHT) - scrollOffset;
+            if (mouseX >= listX && mouseX <= listX + listW && mouseY >= listY && mouseY <= listY + listH) {
+                int cardW = (listW - 20) / 2;
+                int cardH = 24;
+                int leftX = listX + 6;
+                int rightX = listX + 12 + cardW;
 
-                // Col 1 click
-                if (mouseX >= leftX && mouseX <= leftX + cardW && mouseY >= currentY && mouseY <= currentY + cardH) {
-                    selectLocation(i);
-                    return true;
-                }
-                // Col 2 click
-                if (i + 1 < locations.size()) {
-                    if (mouseX >= rightX && mouseX <= rightX + cardW && mouseY >= currentY && mouseY <= currentY + cardH) {
-                        selectLocation(i + 1);
+                int row = 0;
+                for (int i = 0; i < locations.size(); i += 2) {
+                    int currentY = listY + 6 + (row * ITEM_HEIGHT) - scrollOffset;
+
+                    if (mouseX >= leftX && mouseX <= leftX + cardW && mouseY >= currentY && mouseY <= currentY + cardH) {
+                        selectLocation(i);
                         return true;
                     }
+                    if (i + 1 < locations.size()) {
+                        if (mouseX >= rightX && mouseX <= rightX + cardW && mouseY >= currentY && mouseY <= currentY + cardH) {
+                            selectLocation(i + 1);
+                            return true;
+                        }
+                    }
+                    row++;
                 }
-                row++;
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private void selectLocation(int index) {
@@ -283,7 +276,6 @@ public class ZHStep3LocationScreen extends ZHBaseWizardScreen {
         synchronized (pingResults) {
             config.locationPing = index < pingResults.size() ? pingResults.get(index) : "40 ms";
         }
-        // If this location disables own IP, ensure config.hasDedicatedIp is reset to false
         if (loc.ownIpDisabled()) {
             config.hasDedicatedIp = false;
         }

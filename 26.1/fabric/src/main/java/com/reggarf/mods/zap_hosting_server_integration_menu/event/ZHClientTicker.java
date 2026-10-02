@@ -3,7 +3,6 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.event;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.ZHClientSetup;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.gui.screens.Screen;
-
 import org.jetbrains.annotations.Nullable;
 
 /**

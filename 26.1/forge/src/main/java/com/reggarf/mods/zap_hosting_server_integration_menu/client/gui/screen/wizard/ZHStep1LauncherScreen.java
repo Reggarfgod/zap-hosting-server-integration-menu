@@ -1,19 +1,20 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ZHStep1LauncherScreen extends ZHBaseWizardScreen {
 
-    private record LauncherIconInfo(ResourceLocation texture, int origW, int origH) {}
+    private record LauncherIconInfo(Identifier texture, int origW, int origH) {}
 
     private List<ZHLiveDataProvider.LauncherEntry> launchers;
 
@@ -54,18 +55,16 @@ public class ZHStep1LauncherScreen extends ZHBaseWizardScreen {
             case "feed-the-beast", "at-launcher", "technic-launcher", "minecraft-adventure", "minecraft-minigames" -> 50;
             default -> 48;
         };
-        return new LauncherIconInfo(ResourceLocation.fromNamespaceAndPath(ZapHosting.MOD_ID, path), w, w);
+        return new LauncherIconInfo(Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, path), w, w);
     }
 
-    private void drawLauncherIcon(GuiGraphics graphics, String key, int iconX, int iconY, int iconSize) {
+    private void drawLauncherIcon(GuiGraphicsExtractor graphics, String key, int iconX, int iconY, int iconSize) {
         LauncherIconInfo info = getIconInfo(key);
-        RenderSystem.enableBlend();
-        graphics.pose().pushPose();
-        graphics.pose().translate(iconX, iconY, 0);
-        graphics.pose().scale((float) iconSize / info.origW(), (float) iconSize / info.origH(), 1.0F);
-        graphics.blit(info.texture(), 0, 0, 0.0F, 0.0F, info.origW(), info.origH(), info.origW(), info.origH());
-        graphics.pose().popPose();
-        RenderSystem.disableBlend();
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(iconX, iconY);
+        graphics.pose().scale((float) iconSize / info.origW(), (float) iconSize / info.origH());
+        graphics.blit(RenderPipelines.GUI_TEXTURED, info.texture(), 0, 0, 0.0F, 0.0F, info.origW(), info.origH(), info.origW(), info.origH());
+        graphics.pose().popMatrix();
     }
 
     private record GridBounds(int startX, int startY, int cardW, int cardH, int gapX, int gapY, int cols, int rows) {}
@@ -96,8 +95,8 @@ public class ZHStep1LauncherScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         GridBounds grid = calculateGrid();
         ZHLiveDataProvider.LauncherEntry hoveredItem = null;
@@ -140,57 +139,60 @@ public class ZHStep1LauncherScreen extends ZHBaseWizardScreen {
             if (nameWidth > textW) {
                 float scale = (float) textW / nameWidth;
                 if (scale >= 0.76f) {
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(textX, titleY + 1, 0);
-                    graphics.pose().scale(scale, scale, 1.0f);
-                    graphics.drawString(this.font, name, 0, 0, selected ? 0xFFFFFFFF : 0xFFDDDDDD, false);
-                    graphics.pose().popPose();
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(textX, titleY + 1);
+                    graphics.pose().scale(scale, scale);
+                    graphics.text(this.font, name, 0, 0, selected ? 0xFFFFFFFF : 0xFFDDDDDD, false);
+                    graphics.pose().popMatrix();
                 } else {
                     String trimmed = this.font.plainSubstrByWidth(name, textW - 8) + "..";
-                    graphics.drawString(this.font, trimmed, textX, titleY, selected ? 0xFFFFFFFF : 0xFFDDDDDD, false);
+                    graphics.text(this.font, trimmed, textX, titleY, selected ? 0xFFFFFFFF : 0xFFDDDDDD, false);
                 }
             } else {
-                graphics.drawString(this.font, name, textX, titleY, selected ? 0xFFFFFFFF : 0xFFDDDDDD, false);
+                graphics.text(this.font, name, textX, titleY, selected ? 0xFFFFFFFF : 0xFFDDDDDD, false);
             }
 
             // Price badge
-            graphics.drawString(this.font, item.fromPrice(), textX, priceY, COLOR_ZAP_GREEN, false);
+            graphics.text(this.font, item.fromPrice(), textX, priceY, COLOR_ZAP_GREEN, false);
         }
 
         // Tooltip for hovered card
         if (hoveredItem != null) {
-            graphics.renderTooltip(this.font, Component.literal(hoveredItem.displayName() + " (" + hoveredItem.fromPrice() + ")"), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(Component.literal(hoveredItem.displayName() + " (" + hoveredItem.fromPrice() + ")"), mouseX, mouseY);
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        GridBounds grid = calculateGrid();
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
+            GridBounds grid = calculateGrid();
+            double mouseX = event.x();
+            double mouseY = event.y();
 
-        for (int i = 0; i < launchers.size(); i++) {
-            int row = i / grid.cols();
-            int col = i % grid.cols();
+            for (int i = 0; i < launchers.size(); i++) {
+                int row = i / grid.cols();
+                int col = i % grid.cols();
 
-            int x = grid.startX() + col * (grid.cardW() + grid.gapX());
-            int y = grid.startY() + row * (grid.cardH() + grid.gapY());
+                int x = grid.startX() + col * (grid.cardW() + grid.gapX());
+                int y = grid.startY() + row * (grid.cardH() + grid.gapY());
 
-            if (mouseX >= x && mouseX <= x + grid.cardW() && mouseY >= y && mouseY <= y + grid.cardH()) {
-                ZHLiveDataProvider.LauncherEntry selectedLauncher = launchers.get(i);
-                boolean wasSelected = selectedLauncher.key().equals(config.launcherKey);
-                config.launcherKey = selectedLauncher.key();
-                config.launcherName = selectedLauncher.displayName();
+                if (mouseX >= x && mouseX <= x + grid.cardW() && mouseY >= y && mouseY <= y + grid.cardH()) {
+                    ZHLiveDataProvider.LauncherEntry selectedLauncher = launchers.get(i);
+                    boolean wasSelected = selectedLauncher.key().equals(config.launcherKey);
+                    config.launcherKey = selectedLauncher.key();
+                    config.launcherName = selectedLauncher.displayName();
 
-                if (wasSelected) {
-                    onNext();
+                    if (wasSelected) {
+                        onNext();
+                        return true;
+                    }
+
+                    CompletableFuture.runAsync(() -> ZHLiveDataProvider.fetchGamesForLauncher(selectedLauncher.key()));
                     return true;
                 }
-
-                // Asynchronously pre-fetch in background without stalling GUI thread
-                CompletableFuture.runAsync(() -> ZHLiveDataProvider.fetchGamesForLauncher(selectedLauncher.key()));
-                return true;
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 }

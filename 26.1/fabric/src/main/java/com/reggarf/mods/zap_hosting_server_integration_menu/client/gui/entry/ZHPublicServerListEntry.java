@@ -1,27 +1,30 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.entry;
 
-import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.ZHLoadingScreen;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
+import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.ZHLoadingScreen;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
+import net.minecraft.client.gui.screens.multiplayer.ZHEntryBase;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.network.EventLoopGroupHolder;
+import net.minecraft.util.Util;
 
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 
-public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
+public class ZHPublicServerListEntry extends ZHEntryBase {
 
-    private static final ResourceLocation LOGO =
-            ResourceLocation.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
+    private static final Identifier LOGO =
+            Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
 
     private final JoinMultiplayerScreen screen;
     private final ServerSelectionList list;
@@ -64,6 +67,16 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
         }
     }
 
+    @Override
+    public void join() {
+        joinServer();
+    }
+
+    @Override
+    public boolean matchesEntry(ServerSelectionList.Entry other) {
+        return other instanceof ZHPublicServerListEntry;
+    }
+
     private void ensurePingStarted() {
         if (!this.pingStarted && this.serverData.state() == ServerData.State.INITIAL) {
             this.pingStarted = true;
@@ -75,11 +88,12 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
                             () -> {},
                             () -> {
                                 this.serverData.setState(
-                                        this.serverData.protocol == SharedConstants.getCurrentVersion().getProtocolVersion()
+                                        this.serverData.protocol == SharedConstants.getCurrentVersion().protocolVersion()
                                                 ? ServerData.State.SUCCESSFUL
                                                 : ServerData.State.INCOMPATIBLE
                                 );
-                            }
+                            },
+                            EventLoopGroupHolder.remote(this.minecraft.options.useNativeTransport())
                     );
                 } catch (UnknownHostException e) {
                     this.serverData.setState(ServerData.State.UNREACHABLE);
@@ -91,7 +105,9 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
+    public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        int top = this.getY();
+        int height = this.getHeight();
         this.topPos = top;
         this.heightPos = height;
 
@@ -114,14 +130,12 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
         guiGraphics.fill(rowLeft, top, rowLeft + rowWidth, top + height, isSelected ? 0x44263B26 : (hovering ? 0x2235393C : 0x181E2224));
 
         // 1. Left side 32x32 Server Icon with green border
-        int iconX = left;
+        int iconX = this.getContentX();
         int iconY = top + (height - 32) / 2;
         guiGraphics.fill(iconX - 1, iconY - 1, iconX + 33, iconY + 33, 0xFF2A3D2A);
-        guiGraphics.renderOutline(iconX - 1, iconY - 1, 34, 34, 0xFF57BC54);
+        guiGraphics.outline(iconX - 1, iconY - 1, 34, 34, 0xFF57BC54);
 
-        RenderSystem.enableBlend();
-        guiGraphics.blit(LOGO, iconX, iconY, 0, 0, 32, 32, 32, 32);
-        RenderSystem.disableBlend();
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, LOGO, iconX, iconY, 0, 0, 32, 32, 32, 32);
 
         // Config / Live data
         String name = this.serverData.name != null ? this.serverData.name : "ZAP-Hosting Official Server";
@@ -149,7 +163,7 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
         int playerCountW = !playerCountText.isEmpty() ? this.minecraft.font.width(playerCountText) : 0;
         int playerCountX = rightEdge - playerCountW;
         if (!playerCountText.isEmpty()) {
-            guiGraphics.drawString(this.minecraft.font, playerCountText, playerCountX, top + 3, 0xFFAAAAAA, false);
+            guiGraphics.text(this.minecraft.font, playerCountText, playerCountX, top + 3, 0xFFAAAAAA, false);
         }
 
         String badgeText = " [OFFICIAL]";
@@ -172,17 +186,17 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
             }
         }
 
-        guiGraphics.drawString(this.minecraft.font, displayName, textX, top + 3, 0xFFFFFFFF, false);
+        guiGraphics.text(this.minecraft.font, displayName, textX, top + 3, 0xFFFFFFFF, false);
         if (!badgeText.isEmpty()) {
             int dispW = this.minecraft.font.width(displayName);
-            guiGraphics.drawString(this.minecraft.font, badgeText, textX + dispW, top + 3, 0xFF57BC54, false);
+            guiGraphics.text(this.minecraft.font, badgeText, textX + dispW, top + 3, 0xFF57BC54, false);
         }
 
         // --- LINE 2: MOTD (live or configured) ---
-        guiGraphics.drawString(this.minecraft.font, motdComponent, textX, top + 14, 0xFFAAAAAA, false);
+        guiGraphics.text(this.minecraft.font, motdComponent, textX, top + 14, 0xFFAAAAAA, false);
 
         // --- LINE 3: IP Address on bottom-left, Status on bottom-right ---
-        guiGraphics.drawString(this.minecraft.font, ip, textX, top + 24, 0xFF7CD47C, false);
+        guiGraphics.text(this.minecraft.font, ip, textX, top + 24, 0xFF7CD47C, false);
 
         String statusText;
         int statusColor;
@@ -203,7 +217,7 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
         int statusW = this.minecraft.font.width(statusText);
         int statusX = rightEdge - statusW;
         int statusY = top + 24;
-        guiGraphics.drawString(this.minecraft.font, statusText, statusX, statusY, statusColor, false);
+        guiGraphics.text(this.minecraft.font, statusText, statusX, statusY, statusColor, false);
 
         // Hover tooltip for latency or connection status (hovering over either right-side indicator)
         int hoverTop = top;
@@ -211,20 +225,22 @@ public class ZHPublicServerListEntry extends ServerSelectionList.Entry {
         int hoverLeft = Math.min(statusX, playerCountX) - 4;
         if (hovering && mouseX >= hoverLeft && mouseX <= rightEdge + 4 && mouseY >= hoverTop && mouseY <= hoverBottom) {
             if (state == ServerData.State.SUCCESSFUL && this.serverData.ping >= 0) {
-                this.screen.setTooltipForNextRenderPass(Component.literal("Ping: " + this.serverData.ping + " ms"));
+                guiGraphics.setTooltipForNextFrame(Component.literal("Ping: " + this.serverData.ping + " ms"), mouseX, mouseY);
             } else if (state == ServerData.State.UNREACHABLE) {
-                this.screen.setTooltipForNextRenderPass(Component.literal("Server unreachable"));
+                guiGraphics.setTooltipForNextFrame(Component.literal("Server unreachable"), mouseX, mouseY);
             } else if (state == ServerData.State.PINGING || state == ServerData.State.INITIAL) {
-                this.screen.setTooltipForNextRenderPass(Component.literal("Pinging server..."));
+                guiGraphics.setTooltipForNextFrame(Component.literal("Pinging server..."), mouseX, mouseY);
             }
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
             this.list.setSelected(this);
-            joinServer();
+            if (doubleClick) {
+                joinServer();
+            }
             return true;
         }
         return false;

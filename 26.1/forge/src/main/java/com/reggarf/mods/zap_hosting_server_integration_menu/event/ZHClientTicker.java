@@ -8,7 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import javax.annotation.Nullable;
 
 /**
- * Client-only event handler for tick polling and popup display on Forge 1.21.1.
+ * Client-only event handler for tick polling and popup display on Forge 26.1.
  */
 public class ZHClientTicker {
 
@@ -16,7 +16,11 @@ public class ZHClientTicker {
     private static volatile int delayTicks = 0;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent.Post event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+
         if (!pendingWelcomeScreen) {
             return;
         }

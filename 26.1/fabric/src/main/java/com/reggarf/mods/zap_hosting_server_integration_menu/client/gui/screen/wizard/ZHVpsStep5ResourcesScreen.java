@@ -2,7 +2,8 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
         super(config, 5, getTotalSteps(config), "VPS RAM & Storage");
     }
 
-    private void drawChip(GuiGraphics graphics, int x, int y, int width, int height, boolean selected, boolean hovered) {
+    private void drawChip(GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean selected, boolean hovered) {
         int bg = selected ? 0xFF283B28 : (hovered ? COLOR_CARD_HOVER : COLOR_CARD_BG);
         int border = selected ? COLOR_CARD_SELECTED : (hovered ? 0xFF666666 : COLOR_CARD_BORDER);
 
@@ -27,8 +28,8 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         List<ZHLiveDataProvider.OptionStep> ramSteps = ZHLiveDataProvider.getVpsRamSteps();
         List<ZHLiveDataProvider.OptionStep> diskSteps = ZHLiveDataProvider.getVpsDiskSteps();
@@ -48,19 +49,19 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
         int curY = listY - scrollOffset;
 
         // 1. RAM Memory
-        graphics.drawString(this.font, "RAM Memory Allocation (Live from ZAP-Hosting):", startX, curY, 0xFFFFFFFF, false);
+        graphics.text(this.font, "RAM Memory Allocation (Live from ZAP-Hosting):", startX, curY, 0xFFFFFFFF, false);
         curY += 13;
         curY = renderChipGrid(graphics, startX, curY, panelW, 20, ramSteps, config.vpsRamGB, mouseX, mouseY, listY, listH);
         curY += 12;
 
         // 2. NVMe SSD Storage
-        graphics.drawString(this.font, "NVMe SSD Storage Space (Live from ZAP-Hosting):", startX, curY, 0xFFFFFFFF, false);
+        graphics.text(this.font, "NVMe SSD Storage Space (Live from ZAP-Hosting):", startX, curY, 0xFFFFFFFF, false);
         curY += 13;
         curY = renderChipGrid(graphics, startX, curY, panelW, 20, diskSteps, config.vpsDiskGB, mouseX, mouseY, listY, listH);
         curY += 12;
 
         // 3. Dedicated IPv4 Addresses
-        graphics.drawString(this.font, "Dedicated IPv4 Addresses (Live from ZAP-Hosting):", startX, curY, 0xFFFFFFFF, false);
+        graphics.text(this.font, "Dedicated IPv4 Addresses (Live from ZAP-Hosting):", startX, curY, 0xFFFFFFFF, false);
         curY += 13;
         curY = renderChipGrid(graphics, startX, curY, panelW, 20, ipSteps, config.vpsIps, mouseX, mouseY, listY, listH);
         curY += 14;
@@ -69,9 +70,9 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
         int summaryH = 26;
         if (curY + summaryH >= listY && curY <= listY + listH) {
             graphics.fill(startX, curY, startX + panelW, curY + summaryH, 0x881E2224);
-            graphics.renderOutline(startX, curY, panelW, summaryH, 0xFF353C40);
+            graphics.outline(startX, curY, panelW, summaryH, 0xFF353C40);
             String specText = config.vpsCpuCores + " Cores | " + config.vpsRamGB + " GB RAM | " + config.vpsDiskGB + " GB NVMe | " + config.vpsIps + " IPv4";
-            graphics.drawCenteredString(this.font, specText, centerX, curY + 8, COLOR_ZAP_GREEN);
+            graphics.centeredText(this.font, specText, centerX, curY + 8, COLOR_ZAP_GREEN);
         }
         curY += summaryH + 10;
 
@@ -87,7 +88,7 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
         }
     }
 
-    private int renderChipGrid(GuiGraphics graphics, int x, int y, int w, int h, List<ZHLiveDataProvider.OptionStep> steps, int currentVal, int mouseX, int mouseY, int listY, int listH) {
+    private int renderChipGrid(GuiGraphicsExtractor graphics, int x, int y, int w, int h, List<ZHLiveDataProvider.OptionStep> steps, int currentVal, int mouseX, int mouseY, int listY, int listH) {
         if (steps == null || steps.isEmpty()) return y;
 
         int cols = steps.size() <= 4 ? steps.size() : (steps.size() <= 6 ? 3 : 4);
@@ -112,7 +113,7 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
                 if (lbl.contains(" - ")) {
                     lbl = lbl.substring(0, lbl.indexOf(" - "));
                 }
-                graphics.drawCenteredString(this.font, lbl, cx + chipW / 2, curY + (h - 8) / 2, sel ? 0xFFFFFFFF : 0xFFCCCCCC);
+                graphics.centeredText(this.font, lbl, cx + chipW / 2, curY + (h - 8) / 2, sel ? 0xFFFFFFFF : 0xFFCCCCCC);
             }
         }
         return curY + h;
@@ -133,16 +134,19 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
             int centerX = this.width / 2;
             int panelW = Math.min(340, this.width - 24);
             int startX = centerX - panelW / 2;
             int listY = 46;
             int listH = this.height - listY - 34;
 
+            double mouseX = event.x();
+            double mouseY = event.y();
+
             if (mouseY < listY || mouseY > listY + listH) {
-                return super.mouseClicked(mouseX, mouseY, button);
+                return super.mouseClicked(event, doubleClick);
             }
 
             List<ZHLiveDataProvider.OptionStep> ramSteps = ZHLiveDataProvider.getVpsRamSteps();
@@ -171,7 +175,7 @@ public class ZHVpsStep5ResourcesScreen extends ZHBaseWizardScreen {
                 config.vpsIpOptionId = step.id();
             })) return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private boolean checkGridClick(int x, int y, int w, int h, List<ZHLiveDataProvider.OptionStep> steps, double mouseX, double mouseY, java.util.function.Consumer<ZHLiveDataProvider.OptionStep> onSelect) {

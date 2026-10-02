@@ -4,7 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
+
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

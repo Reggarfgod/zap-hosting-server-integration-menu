@@ -27,7 +27,7 @@ public class ZapHosting {
         NeoForge.EVENT_BUS.register(ZHMessageHandler.class);
 
         // Only register client-only screens and providers when on the physical client
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             ZHClientSetup.initClient();
         }
     }
@@ -38,7 +38,7 @@ public class ZapHosting {
                 ZHWelcomePopupPayload.TYPE,
                 ZHWelcomePopupPayload.STREAM_CODEC,
                 (payload, context) -> {
-                    if (FMLEnvironment.dist.isClient()) {
+                    if (FMLEnvironment.getDist().isClient()) {
                         ZHClientSetup.handleWelcomePacketOnClient(payload, context);
                     }
                 }

@@ -2,7 +2,7 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -41,8 +41,8 @@ public class ZHStep4SlotsScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int topY = 44;
@@ -61,21 +61,21 @@ public class ZHStep4SlotsScreen extends ZHBaseWizardScreen {
 
         // 2. Draw card labels and information
         if (!slotSteps.isEmpty()) {
-            graphics.drawString(this.font, slotSteps.get(0).label(), boxX + 16, sliderY + 24, 0xFF888888);
+            graphics.text(this.font, slotSteps.get(0).label(), boxX + 16, sliderY + 24, 0xFF888888);
             String maxLabel = slotSteps.get(slotSteps.size() - 1).label();
-            graphics.drawString(this.font, maxLabel, boxX + boxW - 16 - this.font.width(maxLabel), sliderY + 24, 0xFF888888);
+            graphics.text(this.font, maxLabel, boxX + boxW - 16 - this.font.width(maxLabel), sliderY + 24, 0xFF888888);
         }
 
         int baseRam = config.getBaseRamGB();
         String ramInfo = "Including " + baseRam + " GB RAM!";
-        graphics.drawCenteredString(this.font, ramInfo, centerX, sliderY + 38, 0xFFCCCCCC);
+        graphics.centeredText(this.font, ramInfo, centerX, sliderY + 38, 0xFFCCCCCC);
 
         String priceFormatted = String.format("+ $%.2f / Month", config.getSlotPriceMonthly());
-        graphics.drawCenteredString(this.font, priceFormatted, centerX, sliderY + 52, COLOR_ZAP_GREEN);
+        graphics.centeredText(this.font, priceFormatted, centerX, sliderY + 52, COLOR_ZAP_GREEN);
 
-        // 3. Render custom slider ON TOP of the card so it is crisp, sharp, and never blurry
+        // 3. Render custom slider ON TOP of the card
         if (slider != null) {
-            slider.render(graphics, mouseX, mouseY, partialTick);
+            slider.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
     }
 

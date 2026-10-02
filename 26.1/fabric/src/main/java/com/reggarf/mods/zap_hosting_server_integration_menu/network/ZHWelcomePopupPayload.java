@@ -5,12 +5,12 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record ZHWelcomePopupPayload(int delayTicks) implements CustomPacketPayload {
 
     public static final Type<ZHWelcomePopupPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(ZapHosting.MOD_ID, "welcome_popup"));
+            new Type<>(Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, "welcome_popup"));
 
     public static final StreamCodec<ByteBuf, ZHWelcomePopupPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT,

@@ -2,7 +2,7 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -51,7 +51,7 @@ public abstract class ZHBaseWizardScreen extends Screen {
         }
 
         @Override
-        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             boolean hovered = this.isHoveredOrFocused();
             int x = getX();
             int y = getY();
@@ -110,7 +110,7 @@ public abstract class ZHBaseWizardScreen extends Screen {
             }
 
             int textY = y + (h - 8) / 2;
-            graphics.drawCenteredString(Minecraft.getInstance().font, getMessage(), x + w / 2, textY, textColor);
+            graphics.centeredText(Minecraft.getInstance().font, getMessage(), x + w / 2, textY, textColor);
         }
     }
 
@@ -131,7 +131,7 @@ public abstract class ZHBaseWizardScreen extends Screen {
         }
 
         @Override
-        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             int x = getX();
             int y = getY();
             int w = getWidth();
@@ -185,7 +185,7 @@ public abstract class ZHBaseWizardScreen extends Screen {
                     graphics.fill(arrowX - 1, bubbleY + bubbleH + 1, arrowX + 1, bubbleY + bubbleH + 2, COLOR_ZAP_GREEN);
                 }
 
-                graphics.drawCenteredString(Minecraft.getInstance().font, bubbleText, bubbleX + bubbleW / 2, bubbleY + 3, 0xFFFFFFFF);
+                graphics.centeredText(Minecraft.getInstance().font, bubbleText, bubbleX + bubbleW / 2, bubbleY + 3, 0xFFFFFFFF);
             }
         }
     }
@@ -285,22 +285,21 @@ public abstract class ZHBaseWizardScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         // Draw solid dark opaque background behind every wizard step to prevent bleeding
         graphics.fill(0, 0, this.width, this.height, 0xFF121415);
         graphics.fillGradient(0, 0, this.width, this.height, 0xFF121415, 0xFF0A0B0C);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
 
         int centerX = this.width / 2;
 
         String stepInfo = "Step " + currentStep + " of " + totalSteps + ": " + stepTitle;
-        graphics.drawCenteredString(this.font, "ZAP-Hosting Server", centerX, 6, COLOR_ZAP_GREEN);
-        graphics.drawCenteredString(this.font, stepInfo, centerX, 17, 0xFFFFFFFF);
+        graphics.centeredText(this.font, "ZAP-Hosting Server", centerX, 6, COLOR_ZAP_GREEN);
+        graphics.centeredText(this.font, stepInfo, centerX, 17, 0xFFFFFFFF);
 
         int dotSpacing = Math.min(26, Math.max(14, (this.width - 40) / (totalSteps + 1)));
         int startX = centerX - ((totalSteps - 1) * dotSpacing) / 2;
@@ -338,13 +337,13 @@ public abstract class ZHBaseWizardScreen extends Screen {
         }
 
         if (textX < leftLimit || (textX + textW) > rightLimit) {
-            graphics.drawCenteredString(this.font, priceText, centerX, this.height - 38, COLOR_ZAP_GREEN);
+            graphics.centeredText(this.font, priceText, centerX, this.height - 38, COLOR_ZAP_GREEN);
         } else {
-            graphics.drawCenteredString(this.font, priceText, centerX, footerY, COLOR_ZAP_GREEN);
+            graphics.centeredText(this.font, priceText, centerX, footerY, COLOR_ZAP_GREEN);
         }
     }
 
-    public static void drawCard(GuiGraphics graphics, int x, int y, int width, int height, boolean selected, boolean hovered) {
+    public static void drawCard(GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean selected, boolean hovered) {
         int bg = selected ? 0xFF283B28 : (hovered ? COLOR_CARD_HOVER : COLOR_CARD_BG);
         int border = selected ? COLOR_CARD_SELECTED : (hovered ? 0xFF666666 : COLOR_CARD_BORDER);
 
@@ -359,9 +358,7 @@ public abstract class ZHBaseWizardScreen extends Screen {
             int bx = x + width - badgeSize - 3;
             int by = y + 3;
             graphics.fill(bx, by, bx + badgeSize, by + badgeSize, COLOR_ZAP_GREEN);
-            Minecraft.getInstance().font.drawInBatch("\u2713", bx + 3, by + 2, 0xFFFFFFFF, false,
-                    graphics.pose().last().pose(), graphics.bufferSource(),
-                    net.minecraft.client.gui.Font.DisplayMode.NORMAL, 0, 15728880);
+            graphics.text(Minecraft.getInstance().font, "\u2713", bx + 3, by + 2, 0xFFFFFFFF);
         }
     }
 }

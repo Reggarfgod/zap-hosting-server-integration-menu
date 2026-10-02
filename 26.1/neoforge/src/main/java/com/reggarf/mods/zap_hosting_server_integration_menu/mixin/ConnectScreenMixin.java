@@ -3,7 +3,7 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.mixin;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.ZHLoadingScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -76,8 +76,8 @@ public abstract class ConnectScreenMixin extends Screen {
         }
     }
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void onRender(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+    @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
+    private void onExtractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         if (isConnectingToPublicServer()) {
             guiGraphics.fillGradient(0, 0, this.width, this.height, 0xEE121415, 0xF90A0B0C);
 
@@ -92,7 +92,7 @@ public abstract class ConnectScreenMixin extends Screen {
             ZHLoadingScreen.renderJoinServerCard(guiGraphics, this.width, this.height, this.font, this.status, serverName, serverIp);
 
             for (Renderable renderable : this.renderables) {
-                renderable.render(guiGraphics, mouseX, mouseY, partialTick);
+                renderable.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
             }
 
             ci.cancel();

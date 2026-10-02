@@ -1,8 +1,8 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard;
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.List;
 
@@ -25,8 +25,8 @@ public class ZHDediStep4OsScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int cardW = Math.min(340, this.width - 24);
@@ -51,12 +51,12 @@ public class ZHDediStep4OsScreen extends ZHBaseWizardScreen {
 
             drawCard(graphics, startX, cy, cardW, CARD_HEIGHT, sel, hov);
 
-            graphics.drawString(this.font, os.name(), startX + 8, cy + 5, sel ? 0xFFFFFFFF : 0xFFDDDDDD, false);
+            graphics.text(this.font, os.name(), startX + 8, cy + 5, sel ? 0xFFFFFFFF : 0xFFDDDDDD, false);
 
             int badgeColor = "RECOMMENDED".equals(os.badge()) ? COLOR_ZAP_GREEN : 0xFF888888;
-            graphics.drawString(this.font, "[" + os.badge() + "]", startX + 8 + this.font.width(os.name()) + 8, cy + 5, badgeColor, false);
+            graphics.text(this.font, "[" + os.badge() + "]", startX + 8 + this.font.width(os.name()) + 8, cy + 5, badgeColor, false);
 
-            graphics.drawString(this.font, os.desc(), startX + 8, cy + 18, 0xFFAAAAAA, false);
+            graphics.text(this.font, os.desc(), startX + 8, cy + 18, 0xFFAAAAAA, false);
         }
 
         graphics.disableScissor();
@@ -84,13 +84,16 @@ public class ZHDediStep4OsScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
             int centerX = this.width / 2;
             int cardW = Math.min(340, this.width - 24);
             int startX = centerX - cardW / 2;
             int listY = 48;
             int listH = this.height - listY - 34;
+
+            double mouseX = event.x();
+            double mouseY = event.y();
 
             for (int i = 0; i < OS_OPTIONS.size(); i++) {
                 int cy = listY + (i - scrollOffset) * (CARD_HEIGHT + GAP);
@@ -105,6 +108,7 @@ public class ZHDediStep4OsScreen extends ZHBaseWizardScreen {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+
+        return super.mouseClicked(event, doubleClick);
     }
 }

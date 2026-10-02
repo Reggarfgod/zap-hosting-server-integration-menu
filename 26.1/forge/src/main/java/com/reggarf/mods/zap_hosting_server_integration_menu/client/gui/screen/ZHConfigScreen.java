@@ -5,7 +5,7 @@ import com.reggarf.mods.zap_hosting_server_integration_menu.config.ZHConfig;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHBaseWizardScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
@@ -365,40 +365,37 @@ public class ZHConfigScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Solid 100% opaque dark gradient background (prevents Minecraft 1.21 menu blur shader bleeding)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fillGradient(0, 0, this.width, this.height, 0xFF141617, 0xFF0B0C0D);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // 1. Draw solid background
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
 
-        // 2. Header Title & Subtitle (crisp, vibrant ZAP Green and bright text)
-        graphics.drawCenteredString(this.font,
+        // Header Title & Subtitle
+        graphics.centeredText(this.font,
                 Component.translatableWithFallback("zap_hosting.config.title", "ZAP-Hosting Configuration").withStyle(ChatFormatting.BOLD),
                 centerX, 10, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
-        graphics.drawCenteredString(this.font,
+        graphics.centeredText(this.font,
                 Component.translatableWithFallback("zap_hosting.config.subtitle", "Customize affiliate links, voucher promo codes, and public server list integration"),
                 centerX, 23, 0xFFAAAAAA);
 
         // Header bottom accent line
         graphics.fill(centerX - 180, 34, centerX + 180, 35, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
-        // 3. Container Card Panel
+        // Central Container Card Panel
         ZHBaseWizardScreen.drawCard(graphics, cardX, cardY, cardW, cardH, false, false);
 
         // Card Header Accent Stripe
         graphics.fill(cardX + 1, cardY + 1, cardX + cardW - 1, cardY + 3, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
-        // 4. Draw Row Separators and Labels
+        // Draw Row Separators and Labels
         for (int i = 0; i < rowCount; i++) {
             int currentY = contentStartY + i * rowH;
 
-            // Row subtle separator line (between rows)
             if (i > 0) {
                 graphics.fill(cardX + 12, currentY - 2, cardX + cardW - 12, currentY - 1, 0xFF2A2D2F);
             }
@@ -457,13 +454,13 @@ public class ZHConfigScreen extends Screen {
             int titleY = currentY + (rowH >= 32 ? 2 : 1);
             int descY = currentY + 13;
 
-            graphics.drawString(this.font, Component.empty().append(title).withStyle(ChatFormatting.BOLD), labelX, titleY, 0xFFFFFFFF);
+            graphics.text(this.font, Component.empty().append(title).withStyle(ChatFormatting.BOLD), labelX, titleY, 0xFFFFFFFF);
             if (rowH >= 30) {
-                graphics.drawString(this.font, desc, labelX, descY, 0xFF8E9396);
+                graphics.text(this.font, desc, labelX, descY, 0xFF8E9396);
             }
         }
 
-        // 5. Draw Custom Frames around EditBoxes
+        // Draw Custom Frames around EditBoxes
         for (BoxContainer container : editBoxContainers) {
             if (container.box.visible) {
                 int bx = container.containerX;
@@ -485,21 +482,28 @@ public class ZHConfigScreen extends Screen {
             }
         }
 
-        // 6. Draw interactive widgets on top of background, cards, and input frames
+        // Draw interactive widgets
         for (GuiEventListener child : this.children()) {
             if (child instanceof Renderable renderable) {
-                renderable.render(graphics, mouseX, mouseY, partialTick);
+                renderable.extractRenderState(graphics, mouseX, mouseY, partialTick);
             }
         }
     }
 
-    // --- Custom ZAP Toggle Switch Button ---
+    // Custom ZAP Toggle Switch Button
     public static class ZHToggleButton extends Button {
         private boolean value;
         private final Consumer<Boolean> onChange;
 
         public ZHToggleButton(int x, int y, int width, int height, boolean initialValue, Consumer<Boolean> onChange) {
-            super(x, y, width, height, getButtonText(initialValue), b -> {}, DEFAULT_NARRATION);
+            super(x, y, width, height, getButtonText(initialValue), b -> {
+                ZHToggleButton tb = (ZHToggleButton) b;
+                tb.value = !tb.value;
+                tb.setMessage(getButtonText(tb.value));
+                if (tb.onChange != null) {
+                    tb.onChange.accept(tb.value);
+                }
+            }, DEFAULT_NARRATION);
             this.value = initialValue;
             this.onChange = onChange;
         }
@@ -508,15 +512,6 @@ public class ZHConfigScreen extends Screen {
             return val
                     ? Component.translatableWithFallback("zap_hosting.config.enabled", "\u2714 Enabled").copy().withStyle(ChatFormatting.BOLD)
                     : Component.translatableWithFallback("zap_hosting.config.disabled", "\u2716 Disabled");
-        }
-
-        @Override
-        public void onPress() {
-            this.value = !this.value;
-            this.setMessage(getButtonText(this.value));
-            if (this.onChange != null) {
-                this.onChange.accept(this.value);
-            }
         }
 
         public boolean getValue() {
@@ -529,7 +524,7 @@ public class ZHConfigScreen extends Screen {
         }
 
         @Override
-        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             boolean hovered = this.isHoveredOrFocused();
             int x = getX();
             int y = getY();
@@ -557,11 +552,11 @@ public class ZHConfigScreen extends Screen {
             graphics.fill(x + w - 1, y, x + w, y + h, border);
 
             int textY = y + (h - 8) / 2;
-            graphics.drawCenteredString(Minecraft.getInstance().font, getMessage(), x + w / 2, textY, textColor);
+            graphics.centeredText(Minecraft.getInstance().font, getMessage(), x + w / 2, textY, textColor);
         }
     }
 
-    // --- Custom ZAP Discount Slider ---
+    // Custom ZAP Discount Slider
     public static class ZHDiscountSlider extends ZHBaseWizardScreen.ZHCustomSlider {
         private int percent;
         private final Consumer<Integer> onChange;
@@ -600,4 +595,3 @@ public class ZHConfigScreen extends Screen {
         }
     }
 }
-

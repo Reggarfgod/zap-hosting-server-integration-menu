@@ -3,7 +3,6 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHBaseWizardScreen;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHStep1LauncherScreen;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHStep10BillingScreen;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.api.ZHOrderLinkGenerator;
@@ -11,20 +10,22 @@ import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProv
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
 import io.netty.channel.ChannelFuture;
 import net.minecraft.DefaultUncaughtExceptionHandler;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.client.quickplay.QuickPlayLog;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.server.ServerPackManager;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.CommonComponents;
@@ -32,7 +33,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.login.LoginProtocols;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.network.EventLoopGroupHolder;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 
@@ -52,8 +54,8 @@ public class ZHLoadingScreen extends Screen {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final ResourceLocation LOGO =
-            ResourceLocation.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
+    public static final Identifier LOGO =
+            Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
 
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 
@@ -113,7 +115,7 @@ public class ZHLoadingScreen extends Screen {
     public static void openAndConnect(Screen parentScreen, String serverName, String serverIp) {
         Minecraft minecraft = Minecraft.getInstance();
         ZHLoadingScreen loadingScreen = new ZHLoadingScreen(parentScreen, serverName, serverIp);
-        minecraft.disconnect(loadingScreen);
+        minecraft.disconnect(loadingScreen, false);
         minecraft.prepareForMultiplayer();
         minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverIp));
         minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, serverIp, serverName);
@@ -234,7 +236,11 @@ public class ZHLoadingScreen extends Screen {
                         if (ZHLoadingScreen.this.aborted) return;
                         conn = new Connection(PacketFlow.CLIENTBOUND);
                         conn.setBandwidthLogger(minecraft.getDebugOverlay().getBandwidthLogger());
-                        ZHLoadingScreen.this.channelFuture = Connection.connect(inetSocketAddress, minecraft.options.useNativeTransport(), conn);
+                        ZHLoadingScreen.this.channelFuture = Connection.connect(
+                                inetSocketAddress,
+                                EventLoopGroupHolder.remote(minecraft.options.useNativeTransport()),
+                                conn
+                        );
                     }
 
                     ZHLoadingScreen.this.channelFuture.syncUninterruptibly();
@@ -260,6 +266,7 @@ public class ZHLoadingScreen extends Screen {
                                     false,
                                     null,
                                     statusComponent -> ZHLoadingScreen.this.connectStatus = statusComponent,
+                                    new LevelLoadTracker(),
                                     null
                             ),
                             false
@@ -341,15 +348,15 @@ public class ZHLoadingScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.fillGradient(0, 0, this.width, this.height, 0xEE121415, 0xF90A0B0C);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
@@ -386,7 +393,7 @@ public class ZHLoadingScreen extends Screen {
 
         // Card backdrop & subtle border
         graphics.fill(cardX, cardY, cardX + cardW, cardY + cardH, 0xDD1E2325);
-        graphics.renderOutline(cardX, cardY, cardW, cardH, 0xFF353A3D);
+        graphics.outline(cardX, cardY, cardW, cardH, 0xFF353A3D);
 
         // 2. Animated / Centered Logo
         int logoSize = 34;
@@ -395,18 +402,16 @@ public class ZHLoadingScreen extends Screen {
 
         // Logo background frame
         graphics.fill(logoX - 3, logoY - 3, logoX + logoSize + 3, logoY + logoSize + 3, 0xFF263228);
-        graphics.renderOutline(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
+        graphics.outline(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
-        RenderSystem.enableBlend();
-        graphics.blit(LOGO, logoX, logoY, 0.0F, 0.0F, logoSize, logoSize, logoSize, logoSize);
-        RenderSystem.disableBlend();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, LOGO, logoX, logoY, 0.0F, 0.0F, logoSize, logoSize, logoSize, logoSize);
 
         // 3. Titles
         String title = mode == Mode.ORDER ? "ZAP-Hosting Order" : "ZAP-Hosting Server";
         String subtitle = mode == Mode.ORDER ? "Preparing Your Server..." : "Preparing Configurator...";
 
-        graphics.drawCenteredString(this.font, title, centerX, logoY + logoSize + 8, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
-        graphics.drawCenteredString(this.font, subtitle, centerX, logoY + logoSize + 20, 0xFFFFFFFF);
+        graphics.centeredText(this.font, title, centerX, logoY + logoSize + 8, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
+        graphics.centeredText(this.font, subtitle, centerX, logoY + logoSize + 20, 0xFFFFFFFF);
 
         // 4. Progress Bar
         int barW = cardW - 40;
@@ -416,7 +421,7 @@ public class ZHLoadingScreen extends Screen {
 
         // Track
         graphics.fill(barX, barY, barX + barW, barY + barH, 0xFF141618);
-        graphics.renderOutline(barX, barY, barW, barH, 0xFF2F3438);
+        graphics.outline(barX, barY, barW, barH, 0xFF2F3438);
 
         // Fill
         int fillW = (int) (barW * Mth.clamp(currentProgress, 0.0f, 1.0f));
@@ -431,17 +436,17 @@ public class ZHLoadingScreen extends Screen {
         String dots = ".".repeat((int) (elapsed % 4));
         String fullStatus = statusMessage.endsWith(".") ? statusMessage : (statusMessage + dots);
 
-        graphics.drawCenteredString(this.font, fullStatus, centerX, barY + 11, 0xFFAAAAAA);
+        graphics.centeredText(this.font, fullStatus, centerX, barY + 11, 0xFFAAAAAA);
     }
 
-    public static void renderJoinServerCard(GuiGraphics graphics, int width, int height, Font font, Component status, String serverName, String serverIp) {
+    public static void renderJoinServerCard(GuiGraphicsExtractor graphics, int width, int height, Font font, Component status, String serverName, String serverIp) {
         renderJoinServerCard(graphics, width, height, font, status, serverName, serverIp, 0L);
     }
 
     /**
      * Dedicated method for rendering custom join screen card when connecting to the public server.
      */
-    public static void renderJoinServerCard(GuiGraphics graphics, int width, int height, Font font, Component status, String serverName, String serverIp, long startTime) {
+    public static void renderJoinServerCard(GuiGraphicsExtractor graphics, int width, int height, Font font, Component status, String serverName, String serverIp, long startTime) {
         int centerX = width / 2;
         int centerY = height / 2;
 
@@ -453,7 +458,7 @@ public class ZHLoadingScreen extends Screen {
 
         // Card backdrop & subtle border
         graphics.fill(cardX, cardY, cardX + cardW, cardY + cardH, 0xDD1E2325);
-        graphics.renderOutline(cardX, cardY, cardW, cardH, 0xFF353A3D);
+        graphics.outline(cardX, cardY, cardW, cardH, 0xFF353A3D);
 
         // 2. Animated / Centered Logo
         int logoSize = 34;
@@ -462,18 +467,16 @@ public class ZHLoadingScreen extends Screen {
 
         // Logo background frame
         graphics.fill(logoX - 3, logoY - 3, logoX + logoSize + 3, logoY + logoSize + 3, 0xFF263228);
-        graphics.renderOutline(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
+        graphics.outline(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
-        RenderSystem.enableBlend();
-        graphics.blit(LOGO, logoX, logoY, 0.0F, 0.0F, logoSize, logoSize, logoSize, logoSize);
-        RenderSystem.disableBlend();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, LOGO, logoX, logoY, 0.0F, 0.0F, logoSize, logoSize, logoSize, logoSize);
 
         // 3. Titles
         String displayTitle = (serverName != null && !serverName.isEmpty()) ? serverName : "ZAP-Hosting Server";
         String displayIp = (serverIp != null && !serverIp.isEmpty()) ? serverIp : "play.zap-hosting.com";
 
-        graphics.drawCenteredString(font, displayTitle, centerX, logoY + logoSize + 8, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
-        graphics.drawCenteredString(font, "Connecting to " + displayIp + "...", centerX, logoY + logoSize + 20, 0xFFFFFFFF);
+        graphics.centeredText(font, displayTitle, centerX, logoY + logoSize + 8, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
+        graphics.centeredText(font, "Connecting to " + displayIp + "...", centerX, logoY + logoSize + 20, 0xFFFFFFFF);
 
         // 4. Animated Connecting Progress Bar (sweeping bar effect)
         int barW = cardW - 40;
@@ -482,7 +485,7 @@ public class ZHLoadingScreen extends Screen {
         int barY = logoY + logoSize + 36;
 
         graphics.fill(barX, barY, barX + barW, barY + barH, 0xFF141618);
-        graphics.renderOutline(barX, barY, barW, barH, 0xFF2F3438);
+        graphics.outline(barX, barY, barW, barH, 0xFF2F3438);
 
         float cycle = ((Util.getMillis() - startTime) % 1800L) / 1800.0f;
         int sweepW = Math.max(30, barW / 3);
@@ -497,6 +500,6 @@ public class ZHLoadingScreen extends Screen {
         String statusStr = status != null ? status.getString() : "Connecting to server...";
         String fullStatus = statusStr.endsWith(".") ? statusStr : (statusStr + dots);
 
-        graphics.drawCenteredString(font, fullStatus, centerX, barY + 11, 0xFFAAAAAA);
+        graphics.centeredText(font, fullStatus, centerX, barY + 11, 0xFFAAAAAA);
     }
 }

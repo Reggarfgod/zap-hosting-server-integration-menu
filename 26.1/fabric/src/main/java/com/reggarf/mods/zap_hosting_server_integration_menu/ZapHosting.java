@@ -14,7 +14,7 @@ public class ZapHosting implements ModInitializer {
     @Override
     public void onInitialize() {
         init();
-        PayloadTypeRegistry.playS2C().register(ZHWelcomePopupPayload.TYPE, ZHWelcomePopupPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ZHWelcomePopupPayload.TYPE, ZHWelcomePopupPayload.STREAM_CODEC);
         ZHMessageHandler.init();
     }
 

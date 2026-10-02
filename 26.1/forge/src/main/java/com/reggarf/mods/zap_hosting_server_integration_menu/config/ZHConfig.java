@@ -79,9 +79,7 @@ public class ZHConfig {
     public void save() {
         Path path = getConfigPath();
         try {
-            if (path.getParent() != null) {
-                Files.createDirectories(path.getParent());
-            }
+            Files.createDirectories(path.getParent());
             try (Writer writer = Files.newBufferedWriter(path)) {
                 GSON.toJson(this, writer);
             }

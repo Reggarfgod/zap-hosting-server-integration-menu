@@ -25,7 +25,7 @@ public class ZHMessageHandler {
             if (isFirstJoin(serverPlayer)) {
                 markPlayerAsJoined(serverPlayer);
 
-                if (FMLEnvironment.dist.isClient()) {
+                if (FMLEnvironment.getDist().isClient()) {
                     // Integrated singleplayer server: trigger locally
                     ZHClientTicker.triggerWelcomePopup(20);
                 } else {
@@ -39,7 +39,7 @@ public class ZHMessageHandler {
     }
 
     public static boolean isFirstJoin(ServerPlayer player) {
-        return !player.getPersistentData().getBoolean("hasJoinedBefore");
+        return !player.getPersistentData().getBoolean("hasJoinedBefore").orElse(false);
     }
 
     public static void markPlayerAsJoined(ServerPlayer player) {

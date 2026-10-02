@@ -1,21 +1,22 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.entry;
 
-import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.ZHLoadingScreen;
-import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHStep1LauncherScreen;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
-import net.minecraft.Util;
+import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.ZHLoadingScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
+import net.minecraft.client.gui.screens.multiplayer.ZHEntryBase;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
-public class ZHServerListEntry extends ServerSelectionList.Entry {
+public class ZHServerListEntry extends ZHEntryBase {
 
-    private static final ResourceLocation BANNER_IMAGE =
-            ResourceLocation.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/wo_bg_overlay_2.png");
+    private static final Identifier BANNER_IMAGE =
+            Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/wo_bg_overlay_2.png");
 
     private static final int BANNER_WIDTH = 256;
     private static final int BANNER_HEIGHT = 33;
@@ -35,7 +36,19 @@ public class ZHServerListEntry extends ServerSelectionList.Entry {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean hovering, float partialTick) {
+    public void join() {
+        this.minecraft.setScreen(new ZHLoadingScreen());
+    }
+
+    @Override
+    public boolean matchesEntry(ServerSelectionList.Entry other) {
+        return other instanceof ZHServerListEntry;
+    }
+
+    @Override
+    public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        int top = this.getY();
+        int height = this.getHeight();
         this.topPos = top;
         this.heightPos = height;
 
@@ -52,41 +65,39 @@ public class ZHServerListEntry extends ServerSelectionList.Entry {
             guiGraphics.fill(rowLeft - 1, top - 1, rowLeft + rowWidth + 1, top + height + 1, 0xFF000000);
         }
 
-        int bannerX = left + (width - BANNER_WIDTH) / 2;
+        int bannerX = this.getX() + (this.getWidth() - BANNER_WIDTH) / 2;
         int bannerY = top + (height - BANNER_HEIGHT) / 2;
 
         // Render clean banner graphic
-        RenderSystem.enableBlend();
-        guiGraphics.blit(BANNER_IMAGE, bannerX, bannerY, 0, 0, BANNER_WIDTH, BANNER_HEIGHT, BANNER_WIDTH, BANNER_HEIGHT);
-        RenderSystem.disableBlend();
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, BANNER_IMAGE, bannerX, bannerY, 0, 0, BANNER_WIDTH, BANNER_HEIGHT, BANNER_WIDTH, BANNER_HEIGHT);
 
         // Banner text
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(bannerX + 53, bannerY + 1, 0);
-        guiGraphics.pose().scale(0.85f, 0.85f, 1.0f);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(bannerX + 53, bannerY + 1);
+        guiGraphics.pose().scale(0.85f, 0.85f);
 
         // Line 1: Need a Server?
-        guiGraphics.drawString(this.minecraft.font, "Need a Server?", 8, 6, 0xFFFFFFFF, false);
+        guiGraphics.text(this.minecraft.font, "Need a Server?", 8, 6, 0xFFFFFFFF, false);
 
         // Line 2: Click me to get your own server!
-        guiGraphics.drawString(this.minecraft.font, "Click me to get your own server!", 8, 18, 0xFF5CB85C, false);
+        guiGraphics.text(this.minecraft.font, "Click me to get your own server!", 8, 18, 0xFF5CB85C, false);
 
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
             int bannerX = this.list.getRowLeft() + (this.list.getRowWidth() - BANNER_WIDTH) / 2;
             int bannerY = this.topPos + (this.heightPos - BANNER_HEIGHT) / 2;
-            boolean clickedBanner = mouseX >= bannerX && mouseX <= bannerX + BANNER_WIDTH
-                    && mouseY >= bannerY && mouseY <= bannerY + BANNER_HEIGHT;
+            boolean clickedBanner = event.x() >= bannerX && event.x() <= bannerX + BANNER_WIDTH
+                    && event.y() >= bannerY && event.y() <= bannerY + BANNER_HEIGHT;
 
             boolean wasSelected = this.list.getSelected() == this;
             this.list.setSelected(this);
 
             long now = Util.getMillis();
-            if (clickedBanner || wasSelected || (now - this.lastClickTime < 300L)) {
+            if (clickedBanner || wasSelected || doubleClick || (now - this.lastClickTime < 300L)) {
                 this.minecraft.setScreen(new ZHLoadingScreen());
                 return true;
             }

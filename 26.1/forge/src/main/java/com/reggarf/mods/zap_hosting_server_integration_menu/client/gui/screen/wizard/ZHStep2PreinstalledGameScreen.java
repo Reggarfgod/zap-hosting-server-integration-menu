@@ -2,8 +2,9 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -72,8 +73,8 @@ public class ZHStep2PreinstalledGameScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int listW = Math.min(340, this.width - 30);
@@ -83,14 +84,14 @@ public class ZHStep2PreinstalledGameScreen extends ZHBaseWizardScreen {
 
         // Container background
         graphics.fill(listX, listY, listX + listW, listY + listH, 0xEE1E2325);
-        graphics.renderOutline(listX, listY, listW, listH, 0xFF353A3D);
+        graphics.outline(listX, listY, listW, listH, 0xFF353A3D);
 
         int visibleItems = listH / ITEM_HEIGHT;
         int maxOffset = Math.max(0, filteredGames.size() - visibleItems);
         scrollOffset = Math.min(scrollOffset, maxOffset);
 
         if (filteredGames.isEmpty()) {
-            graphics.drawCenteredString(this.font, "No matching items found", centerX, listY + 20, 0xFFAAAAAA);
+            graphics.centeredText(this.font, "No matching items found", centerX, listY + 20, 0xFFAAAAAA);
             return;
         }
 
@@ -108,7 +109,7 @@ public class ZHStep2PreinstalledGameScreen extends ZHBaseWizardScreen {
 
             if (isSelected) {
                 graphics.fill(listX + 2, itemY + 1, listX + listW - 2, itemY + ITEM_HEIGHT - 1, 0xFF2D3A2F);
-                graphics.renderOutline(listX + 2, itemY + 1, listW - 4, ITEM_HEIGHT - 2, COLOR_ZAP_GREEN);
+                graphics.outline(listX + 2, itemY + 1, listW - 4, ITEM_HEIGHT - 2, COLOR_ZAP_GREEN);
             } else if (isHovered) {
                 graphics.fill(listX + 2, itemY + 1, listX + listW - 2, itemY + ITEM_HEIGHT - 1, 0xFF2A2F33);
             }
@@ -121,10 +122,10 @@ public class ZHStep2PreinstalledGameScreen extends ZHBaseWizardScreen {
             if (name.length() > maxChars) {
                 name = name.substring(0, Math.max(5, maxChars - 2)) + "..";
             }
-            graphics.drawString(this.font, name, listX + 16, itemY + 6, isSelected ? 0xFFFFFFFF : 0xFFCCCCCC);
+            graphics.text(this.font, name, listX + 16, itemY + 6, isSelected ? 0xFFFFFFFF : 0xFFCCCCCC);
 
             if (isSelected) {
-                graphics.drawString(this.font, "✓", listX + listW - 16, itemY + 6, COLOR_ZAP_GREEN);
+                graphics.text(this.font, "\u2713", listX + listW - 16, itemY + 6, COLOR_ZAP_GREEN);
             }
         }
 
@@ -154,50 +155,55 @@ public class ZHStep2PreinstalledGameScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int centerX = this.width / 2;
-        int listW = Math.min(340, this.width - 30);
-        int listX = centerX - listW / 2;
-        int listY = 64;
-        int listH = this.height - listY - 38;
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
+            int centerX = this.width / 2;
+            int listW = Math.min(340, this.width - 30);
+            int listX = centerX - listW / 2;
+            int listY = 64;
+            int listH = this.height - listY - 38;
 
-        if (mouseX >= listX && mouseX <= listX + listW && mouseY >= listY && mouseY <= listY + listH) {
-            int clickedRow = (int) ((mouseY - listY) / ITEM_HEIGHT);
-            int index = scrollOffset + clickedRow;
-            if (index >= 0 && index < filteredGames.size()) {
-                ZHLiveDataProvider.GameItem chosen = filteredGames.get(index);
-                boolean wasSelected = isGameSelected(chosen);
+            double mouseX = event.x();
+            double mouseY = event.y();
 
-                config.pgid = chosen.optionId();
-                config.gameName = chosen.displayName();
-                try {
-                    config.gameId = Integer.parseInt(chosen.optionId());
-                } catch (Exception ignored) {}
+            if (mouseX >= listX && mouseX <= listX + listW && mouseY >= listY && mouseY <= listY + listH) {
+                int clickedRow = (int) ((mouseY - listY) / ITEM_HEIGHT);
+                int index = scrollOffset + clickedRow;
+                if (index >= 0 && index < filteredGames.size()) {
+                    ZHLiveDataProvider.GameItem chosen = filteredGames.get(index);
+                    boolean wasSelected = isGameSelected(chosen);
 
-                if ("vps".equals(config.launcherKey)) {
-                    config.vpsOs = chosen.displayName();
-                    config.vpsOsId = chosen.optionId();
-                } else if ("dedicated-server".equals(config.launcherKey)) {
-                    config.dediModelName = chosen.displayName();
-                    config.dediModelId = chosen.optionId();
-                    if (chosen.displayName().contains("$67.15")) config.dediBasePrice = 67.15;
-                    else if (chosen.displayName().contains("$79.00")) config.dediBasePrice = 79.00;
-                    else if (chosen.displayName().contains("$89.00")) config.dediBasePrice = 89.00;
-                    else if (chosen.displayName().contains("$119.00")) config.dediBasePrice = 119.00;
-                    else if (chosen.displayName().contains("$149.00")) config.dediBasePrice = 149.00;
-                    else if (chosen.displayName().contains("$189.00")) config.dediBasePrice = 189.00;
-                    else if (chosen.displayName().contains("$249.00")) config.dediBasePrice = 249.00;
-                    else if (chosen.displayName().contains("$299.00")) config.dediBasePrice = 299.00;
-                    else if (chosen.displayName().contains("$499.00")) config.dediBasePrice = 499.00;
+                    config.pgid = chosen.optionId();
+                    config.gameName = chosen.displayName();
+                    try {
+                        config.gameId = Integer.parseInt(chosen.optionId());
+                    } catch (Exception ignored) {}
+
+                    if ("vps".equals(config.launcherKey)) {
+                        config.vpsOs = chosen.displayName();
+                        config.vpsOsId = chosen.optionId();
+                    } else if ("dedicated-server".equals(config.launcherKey)) {
+                        config.dediModelName = chosen.displayName();
+                        config.dediModelId = chosen.optionId();
+                        if (chosen.displayName().contains("$67.15")) config.dediBasePrice = 67.15;
+                        else if (chosen.displayName().contains("$79.00")) config.dediBasePrice = 79.00;
+                        else if (chosen.displayName().contains("$89.00")) config.dediBasePrice = 89.00;
+                        else if (chosen.displayName().contains("$119.00")) config.dediBasePrice = 119.00;
+                        else if (chosen.displayName().contains("$149.00")) config.dediBasePrice = 149.00;
+                        else if (chosen.displayName().contains("$189.00")) config.dediBasePrice = 189.00;
+                        else if (chosen.displayName().contains("$249.00")) config.dediBasePrice = 249.00;
+                        else if (chosen.displayName().contains("$299.00")) config.dediBasePrice = 299.00;
+                        else if (chosen.displayName().contains("$499.00")) config.dediBasePrice = 499.00;
+                    }
+
+                    if (wasSelected) {
+                        onNext();
+                    }
+                    return true;
                 }
-
-                if (wasSelected) {
-                    onNext();
-                }
-                return true;
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 }

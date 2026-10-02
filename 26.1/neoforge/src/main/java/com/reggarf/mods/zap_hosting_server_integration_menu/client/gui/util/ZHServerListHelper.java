@@ -6,6 +6,9 @@ import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.entry.ZHS
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ZHServerListHelper {
 
     public static void ensureCustomEntries(JoinMultiplayerScreen screen, ServerSelectionList list) {
@@ -24,12 +27,20 @@ public class ZHServerListHelper {
             if (entry instanceof ZHPublicServerListEntry) hasPublic = true;
         }
 
-        int insertIndex = 0;
-        if (showBanner && !hasBanner) {
-            list.children().add(insertIndex++, new ZHServerListEntry(screen, list));
-        }
-        if (showPublic && !hasPublic) {
-            list.children().add(insertIndex, new ZHPublicServerListEntry(screen, list));
+        if ((showBanner && !hasBanner) || (showPublic && !hasPublic)) {
+            List<ServerSelectionList.Entry> entries = new ArrayList<>();
+            if (showBanner) {
+                entries.add(new ZHServerListEntry(screen, list));
+            }
+            if (showPublic) {
+                entries.add(new ZHPublicServerListEntry(screen, list));
+            }
+            for (ServerSelectionList.Entry entry : list.children()) {
+                if (!(entry instanceof ZHServerListEntry) && !(entry instanceof ZHPublicServerListEntry)) {
+                    entries.add(entry);
+                }
+            }
+            list.replaceEntries(entries);
         }
     }
 }

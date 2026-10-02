@@ -2,7 +2,7 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -41,8 +41,8 @@ public class ZHStep6DiskSpaceScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int topY = 44;
@@ -62,20 +62,20 @@ public class ZHStep6DiskSpaceScreen extends ZHBaseWizardScreen {
         // 2. Draw card labels and information
         String minStr = "0 Gigabyte";
         String maxStr = diskSteps.isEmpty() ? "200 Gigabyte" : diskSteps.get(diskSteps.size() - 1).label();
-        graphics.drawString(this.font, minStr, boxX + 15, sliderY + 24, 0xFF888888);
-        graphics.drawString(this.font, maxStr, boxX + boxW - this.font.width(maxStr) - 15, sliderY + 24, 0xFF888888);
+        graphics.text(this.font, minStr, boxX + 15, sliderY + 24, 0xFF888888);
+        graphics.text(this.font, maxStr, boxX + boxW - this.font.width(maxStr) - 15, sliderY + 24, 0xFF888888);
 
         String diskInfo = config.diskSpaceGB == 0 ? "Fast NVMe SSD storage included by default!" :
                 "+" + config.diskSpaceGB + " GB NVMe SSD High-Speed Storage Added";
-        graphics.drawCenteredString(this.font, diskInfo, centerX, sliderY + 38, 0xFFCCCCCC);
+        graphics.centeredText(this.font, diskInfo, centerX, sliderY + 38, 0xFFCCCCCC);
 
         double price = config.getDiskPriceMonthly();
         String priceFormatted = price > 0 ? String.format("+ $%.2f / Month", price) : "$0.00";
-        graphics.drawCenteredString(this.font, priceFormatted, centerX, sliderY + 52, COLOR_ZAP_GREEN);
+        graphics.centeredText(this.font, priceFormatted, centerX, sliderY + 52, COLOR_ZAP_GREEN);
 
         // 3. Render custom slider ON TOP of the card
         if (slider != null) {
-            slider.render(graphics, mouseX, mouseY, partialTick);
+            slider.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
     }
 

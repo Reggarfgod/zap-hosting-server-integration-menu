@@ -25,7 +25,7 @@ public class ZHMessageHandler {
     }
 
     public static boolean isFirstJoin(ServerPlayer player) {
-        return !player.getTags().contains(JOIN_TAG);
+        return !player.entityTags().contains(JOIN_TAG);
     }
 
     public static void markPlayerAsJoined(ServerPlayer player) {

@@ -3,7 +3,7 @@ package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.w
 import com.reggarf.mods.zap_hosting_server_integration_menu.api.ZHOrderLinkGenerator;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHLiveDataProvider;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -46,7 +46,7 @@ public class ZHStep10BillingScreen extends ZHBaseWizardScreen {
         int btnY = this.height - 27;
         int orderBtnW = 135;
         orderButton = new ZHCustomButton(centerX + 75, btnY, orderBtnW, 20,
-                Component.literal("🚀 Order Server Now"),
+                Component.literal("\ud83d\ude80 Order Server Now"),
                 b -> startOrderProcess(),
                 ZHCustomButton.Style.PRIMARY);
         addRenderableWidget(orderButton);
@@ -68,8 +68,8 @@ public class ZHStep10BillingScreen extends ZHBaseWizardScreen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
         int sliderW = Math.min(300, this.width - 40);
@@ -104,30 +104,30 @@ public class ZHStep10BillingScreen extends ZHBaseWizardScreen {
         int lineY = summaryY + 9;
 
         // 1. Billing Cycle
-        graphics.drawString(this.font, "Billing Cycle:", padX, lineY, 0xFFAAAAAA);
+        graphics.text(this.font, "Billing Cycle:", padX, lineY, 0xFFAAAAAA);
         String cycleText = step != null ? step.label() : config.billingIntervalDays + " Days";
-        graphics.drawString(this.font, cycleText, summaryX + summaryW - 12 - this.font.width(cycleText), lineY, 0xFFFFFFFF);
+        graphics.text(this.font, cycleText, summaryX + summaryW - 12 - this.font.width(cycleText), lineY, 0xFFFFFFFF);
 
         // 2. Monthly Server Price
         lineY += 14;
-        graphics.drawString(this.font, "Monthly Server Price:", padX, lineY, 0xFFAAAAAA);
+        graphics.text(this.font, "Monthly Server Price:", padX, lineY, 0xFFAAAAAA);
         String priceText = String.format("$%.2f / Mo", config.getTotalMonthlyPrice());
-        graphics.drawString(this.font, priceText, summaryX + summaryW - 12 - this.font.width(priceText), lineY, 0xFFCCCCCC);
+        graphics.text(this.font, priceText, summaryX + summaryW - 12 - this.font.width(priceText), lineY, 0xFFCCCCCC);
 
         // 3. Pre-payment Discount
         lineY += 14;
         int discount = config.getDiscountPercent();
-        graphics.drawString(this.font, "Pre-payment Discount:", padX, lineY, 0xFFAAAAAA);
+        graphics.text(this.font, "Pre-payment Discount:", padX, lineY, 0xFFAAAAAA);
         String discountText = discount > 0 ? "-" + discount + "% Save!" : "None";
         int discountColor = discount > 0 ? COLOR_ZAP_GREEN : 0xFF888888;
-        graphics.drawString(this.font, discountText, summaryX + summaryW - 12 - this.font.width(discountText), lineY, discountColor);
+        graphics.text(this.font, discountText, summaryX + summaryW - 12 - this.font.width(discountText), lineY, discountColor);
 
         // 4. Voucher / Promo Code
         if (hasVoucher) {
             lineY += 14;
-            graphics.drawString(this.font, "Voucher Code:", padX, lineY, 0xFFAAAAAA);
+            graphics.text(this.font, "Voucher Code:", padX, lineY, 0xFFAAAAAA);
             String voucherText = voucherCode + " (-" + voucherDiscount + "% Save!)";
-            graphics.drawString(this.font, voucherText, summaryX + summaryW - 12 - this.font.width(voucherText), lineY, COLOR_ZAP_GREEN);
+            graphics.text(this.font, voucherText, summaryX + summaryW - 12 - this.font.width(voucherText), lineY, COLOR_ZAP_GREEN);
         }
 
         // Divider
@@ -136,16 +136,16 @@ public class ZHStep10BillingScreen extends ZHBaseWizardScreen {
 
         // 5. Total Due Today
         lineY += 5;
-        graphics.drawString(this.font, "Total Due Today:", padX, lineY, 0xFFFFFFFF);
+        graphics.text(this.font, "Total Due Today:", padX, lineY, 0xFFFFFFFF);
         String dueToday = String.format("$%.2f", config.getDueToday());
         int dueX = summaryX + summaryW - 12 - this.font.width(dueToday);
-        graphics.drawString(this.font, dueToday, dueX, lineY, COLOR_ZAP_GREEN);
+        graphics.text(this.font, dueToday, dueX, lineY, COLOR_ZAP_GREEN);
 
         if (hasVoucher && config.getVoucherSavings() > 0) {
             String originalDue = String.format("$%.2f", config.getSubtotalDue());
             int origW = this.font.width(originalDue);
             int origX = dueX - origW - 6;
-            graphics.drawString(this.font, originalDue, origX, lineY, 0xFF777777);
+            graphics.text(this.font, originalDue, origX, lineY, 0xFF777777);
             int strkY = lineY + 4;
             graphics.fill(origX - 1, strkY, origX + origW + 1, strkY + 1, 0xFF888888);
         }
@@ -154,15 +154,15 @@ public class ZHStep10BillingScreen extends ZHBaseWizardScreen {
         int noticeY = summaryY + summaryH + 6;
         if (noticeY + 10 < this.height - 30) {
             if (!statusMessage.isEmpty()) {
-                graphics.drawCenteredString(this.font, statusMessage, centerX, noticeY, COLOR_ZAP_GREEN);
+                graphics.centeredText(this.font, statusMessage, centerX, noticeY, COLOR_ZAP_GREEN);
             } else if (hasVoucher) {
-                graphics.drawCenteredString(this.font, "✔ Code " + voucherCode + " will be auto-applied at checkout!", centerX, noticeY, 0xFF8AE58A);
+                graphics.centeredText(this.font, "\u2714 Code " + voucherCode + " will be auto-applied at checkout!", centerX, noticeY, 0xFF8AE58A);
             }
         }
 
         // Render slider ON TOP
         if (slider != null) {
-            slider.render(graphics, mouseX, mouseY, partialTick);
+            slider.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
     }
 

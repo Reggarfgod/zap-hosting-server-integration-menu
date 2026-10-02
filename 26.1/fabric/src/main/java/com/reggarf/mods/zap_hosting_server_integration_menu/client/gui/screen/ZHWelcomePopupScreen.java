@@ -1,19 +1,21 @@
 package com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.reggarf.mods.zap_hosting_server_integration_menu.ZapHosting;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHBaseWizardScreen;
 import com.reggarf.mods.zap_hosting_server_integration_menu.client.gui.screen.wizard.ZHBaseWizardScreen.ZHCustomButton;
 import com.reggarf.mods.zap_hosting_server_integration_menu.model.ZHOrderConfig;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 import java.net.URI;
@@ -22,8 +24,8 @@ import java.nio.charset.StandardCharsets;
 
 public class ZHWelcomePopupScreen extends Screen {
 
-    private static final ResourceLocation LOGO_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
+    private static final Identifier LOGO_TEXTURE =
+            Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
 
     @Nullable
     private final Screen parentScreen;
@@ -159,34 +161,38 @@ public class ZHWelcomePopupScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int cardW = Math.min(360, this.width - 24);
-        int cardH = Math.min(256, this.height - 24);
-        int cardX = (this.width - cardW) / 2;
-        int cardY = (this.height - cardH) / 2;
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0) {
+            int cardW = Math.min(360, this.width - 24);
+            int cardH = Math.min(256, this.height - 24);
+            int cardX = (this.width - cardW) / 2;
+            int cardY = (this.height - cardH) / 2;
 
-        // Checkbox click toggle in footer
-        int chkX = cardX + 16;
-        int chkY = cardY + 218;
-        Component chkLabel = Component.translatableWithFallback("zap_hosting.popup.dont_show", "Don't show this again");
-        int chkW = this.font.width(chkLabel) + 20;
-        int chkH = 14;
+            int chkX = cardX + 16;
+            int chkY = cardY + 218;
+            Component chkLabel = Component.translatableWithFallback("zap_hosting.popup.dont_show", "Don't show this again");
+            int chkW = this.font.width(chkLabel) + 20;
+            int chkH = 14;
 
-        if (mouseX >= chkX && mouseX <= chkX + chkW && mouseY >= chkY && mouseY <= chkY + chkH) {
-            dontShowAgain = !dontShowAgain;
-            return true;
+            double mouseX = event.x();
+            double mouseY = event.y();
+
+            if (mouseX >= chkX && mouseX <= chkX + chkW && mouseY >= chkY && mouseY <= chkY + chkH) {
+                dontShowAgain = !dontShowAgain;
+                return true;
+            }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256) { // ESC key
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == 256) { // ESC key
             markSeenAndClose();
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private void markSeen() {
@@ -209,16 +215,14 @@ public class ZHWelcomePopupScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Blur and dim the 3D in-game world behind the popup BEFORE drawing card content
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.fillGradient(0, 0, this.width, this.height, 0x880A0C0E, 0xAA121517);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // 1. Render background world blur and dimming FIRST
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        this.extractBackground(graphics, mouseX, mouseY, partialTick);
 
         int cardW = Math.min(360, this.width - 24);
         int cardH = Math.min(256, this.height - 24);
@@ -238,18 +242,16 @@ public class ZHWelcomePopupScreen extends Screen {
 
         // Logo background frame
         graphics.fill(logoX - 2, logoY - 2, logoX + logoSize + 2, logoY + logoSize + 2, 0xFF263228);
-        graphics.renderOutline(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
+        graphics.outline(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
-        RenderSystem.enableBlend();
-        graphics.blit(LOGO_TEXTURE, logoX, logoY, 0.0F, 0.0F, logoSize, logoSize, logoSize, logoSize);
-        RenderSystem.disableBlend();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, LOGO_TEXTURE, logoX, logoY, 0.0F, 0.0F, logoSize, logoSize, logoSize, logoSize);
 
         int headerTextX = logoX + logoSize + 10;
-        graphics.drawString(this.font, Component.literal("ZAP-HOSTING").withStyle(ChatFormatting.BOLD),
+        graphics.text(this.font, Component.literal("ZAP-HOSTING").withStyle(ChatFormatting.BOLD),
                 headerTextX, logoY + 3, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
         Component subtitle = Component.translatableWithFallback("zap_hosting.popup.badge", "OFFICIAL SERVER PARTNER");
-        graphics.drawString(this.font, subtitle, headerTextX, logoY + 16, 0xFF8E9396);
+        graphics.text(this.font, subtitle, headerTextX, logoY + 16, 0xFF8E9396);
 
         // Header separator
         graphics.fill(cardX + 16, cardY + 48, cardX + cardW - 16, cardY + 49, 0xFF2A2D2F);
@@ -259,19 +261,19 @@ public class ZHWelcomePopupScreen extends Screen {
                 "zap_hosting.popup.headline",
                 "Ready to play with friends or host this modpack?"
         ).copy().withStyle(ChatFormatting.BOLD);
-        graphics.drawString(this.font, headline, cardX + 16, cardY + 56, 0xFFFFFFFF);
+        graphics.text(this.font, headline, cardX + 16, cardY + 56, 0xFFFFFFFF);
 
         Component descLine1 = Component.translatableWithFallback(
                 "zap_hosting.popup.desc1",
                 "Get reliable DDoS-protected game servers with instant setup"
         );
-        graphics.drawString(this.font, descLine1, cardX + 16, cardY + 69, 0xFFB0B5B8);
+        graphics.text(this.font, descLine1, cardX + 16, cardY + 69, 0xFFB0B5B8);
 
         Component descLine2 = Component.translatableWithFallback(
                 "zap_hosting.popup.desc2",
                 "and low ping worldwide from ZAP-Hosting!"
         );
-        graphics.drawString(this.font, descLine2, cardX + 16, cardY + 80, 0xFFB0B5B8);
+        graphics.text(this.font, descLine2, cardX + 16, cardY + 80, 0xFFB0B5B8);
 
         // 5. Voucher Code Highlight Box
         int vBoxX = cardX + 16;
@@ -281,10 +283,10 @@ public class ZHWelcomePopupScreen extends Screen {
 
         // Voucher Box Background & Green Border
         graphics.fill(vBoxX, vBoxY, vBoxX + vBoxW, vBoxY + vBoxH, 0xFF19221C);
-        graphics.renderOutline(vBoxX, vBoxY, vBoxW, vBoxH, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
+        graphics.outline(vBoxX, vBoxY, vBoxW, vBoxH, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
 
         // Voucher label
-        graphics.drawString(this.font,
+        graphics.text(this.font,
                 Component.translatableWithFallback("zap_hosting.popup.voucher_label", "PROMO VOUCHER CODE").copy().withStyle(ChatFormatting.BOLD),
                 vBoxX + 10, vBoxY + 7, 0xFF7AE67A);
 
@@ -294,9 +296,9 @@ public class ZHWelcomePopupScreen extends Screen {
         int codeX = vBoxX + 10;
         int codeY = vBoxY + 23;
         int codeW = this.font.width(codeComp);
-        graphics.drawString(this.font, codeComp, codeX, codeY, 0xFFFFD700);
+        graphics.text(this.font, codeComp, codeX, codeY, 0xFFFFD700);
 
-        // Discount Tag Pill Badge (dynamically positioned with proper padding to prevent any text overlap)
+        // Discount Tag Pill Badge
         int discount = getDiscountPercent();
         Component tagComp = Component.literal(discount + "% OFF").withStyle(ChatFormatting.BOLD);
         int tagTextW = this.font.width(tagComp);
@@ -307,28 +309,27 @@ public class ZHWelcomePopupScreen extends Screen {
         int tagY = vBoxY + 21;
 
         graphics.fill(tagX, tagY, tagX + tagW, tagY + tagH, 0xFF3E9B3E);
-        graphics.renderOutline(tagX, tagY, tagW, tagH, 0xFF63C963);
-        graphics.drawString(this.font, tagComp, tagX + tagPaddingX, tagY + 2, 0xFFFFFFFF);
+        graphics.outline(tagX, tagY, tagW, tagH, 0xFF63C963);
+        graphics.text(this.font, tagComp, tagX + tagPaddingX, tagY + 2, 0xFFFFFFFF);
 
-        // 6. Don't Show Again Checkbox (at the bottom)
+        // 6. Don't Show Again Checkbox
         int chkX = cardX + 16;
         int chkY = cardY + 218;
         int boxSize = 10;
 
-        // Checkbox box
         graphics.fill(chkX, chkY, chkX + boxSize, chkY + boxSize, 0xFF242729);
-        graphics.renderOutline(chkX, chkY, boxSize, boxSize, dontShowAgain ? ZHBaseWizardScreen.COLOR_ZAP_GREEN : 0xFF555555);
+        graphics.outline(chkX, chkY, boxSize, boxSize, dontShowAgain ? ZHBaseWizardScreen.COLOR_ZAP_GREEN : 0xFF555555);
         if (dontShowAgain) {
             graphics.fill(chkX + 2, chkY + 2, chkX + boxSize - 2, chkY + boxSize - 2, ZHBaseWizardScreen.COLOR_ZAP_GREEN);
         }
 
         Component chkLabel = Component.translatableWithFallback("zap_hosting.popup.dont_show", "Don't show this again");
-        graphics.drawString(this.font, chkLabel, chkX + boxSize + 6, chkY + 1, 0xFF9E9E9E);
+        graphics.text(this.font, chkLabel, chkX + boxSize + 6, chkY + 1, 0xFF9E9E9E);
 
-        // 7. Render interactive widgets (drawn directly on top, completely sharp and unblurred)
+        // 7. Render interactive widgets
         for (GuiEventListener child : this.children()) {
             if (child instanceof Renderable renderable) {
-                renderable.render(graphics, mouseX, mouseY, partialTick);
+                renderable.extractRenderState(graphics, mouseX, mouseY, partialTick);
             }
         }
     }
