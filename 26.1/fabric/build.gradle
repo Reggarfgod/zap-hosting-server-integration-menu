@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'idea'
 }
 
 base {
@@ -42,6 +43,7 @@ repositories {
 dependencies {
     // 26.1 Minecraft client jar & libraries
     compileOnly files("${System.getProperty('user.home')}/.gradle/caches/neoformruntime/artifacts/minecraft_26.1.2_client.jar")
+    runtimeOnly files("${System.getProperty('user.home')}/.gradle/caches/neoformruntime/artifacts/minecraft_26.1.2_client.jar")
     
     compileOnly "net.fabricmc:fabric-loader:${fabric_loader_version_26}"
     compileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_api_version_26}"
@@ -62,6 +64,21 @@ dependencies {
 
     compileOnly "io.github.llamalad7:mixinextras-common:0.4.1"
     compileOnly "io.github.llamalad7:mixinextras-fabric:0.4.1"
+}
+
+tasks.register('runClient', JavaExec) {
+    group = 'runs'
+    description = 'Runs the client Minecraft run configuration.'
+    dependsOn classes
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(project.java_version_26 as int)
+    }
+    workingDir = file('run')
+    doFirst {
+        file('run').mkdirs()
+    }
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
 }
 
 processResources {
