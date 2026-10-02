@@ -8,7 +8,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
-import net.minecraft.client.gui.screens.multiplayer.ZHEntryBase;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
@@ -21,7 +20,7 @@ import net.minecraft.util.Util;
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 
-public class ZHPublicServerListEntry extends ZHEntryBase {
+public class ZHPublicServerListEntry extends ServerSelectionList.OnlineServerEntry {
 
     private static final Identifier LOGO =
             Identifier.fromNamespaceAndPath(ZapHosting.MOD_ID, "textures/gui/logo.png");
@@ -29,17 +28,25 @@ public class ZHPublicServerListEntry extends ZHEntryBase {
     private final JoinMultiplayerScreen screen;
     private final ServerSelectionList list;
     private final Minecraft minecraft;
-    private final ServerData serverData;
+    private final ServerData publicServerData;
     private boolean pingStarted = false;
 
     private int topPos;
     private int heightPos;
 
     public ZHPublicServerListEntry(JoinMultiplayerScreen screen, ServerSelectionList list) {
+        this(screen, list, createServerData());
+    }
+
+    private ZHPublicServerListEntry(JoinMultiplayerScreen screen, ServerSelectionList list, ServerData serverData) {
+        list.super(screen, serverData);
         this.screen = screen;
         this.list = list;
         this.minecraft = Minecraft.getInstance();
+        this.publicServerData = serverData;
+    }
 
+    private static ServerData createServerData() {
         String ip = (ZapHosting.CONFIG != null && ZapHosting.CONFIG.common != null && ZapHosting.CONFIG.common.publicServerIp != null && !ZapHosting.CONFIG.common.publicServerIp.trim().isEmpty())
                 ? ZapHosting.CONFIG.common.publicServerIp.trim()
                 : "play.zap-hosting.com";
@@ -48,19 +55,19 @@ public class ZHPublicServerListEntry extends ZHEntryBase {
                 ? ZapHosting.CONFIG.common.publicServerName.trim()
                 : "ZAP-Hosting Official Server";
 
-        this.serverData = new ServerData(name, ip, ServerData.Type.OTHER);
+        return new ServerData(name, ip, ServerData.Type.OTHER);
     }
 
     public void joinServer() {
         boolean customScreen = ZapHosting.CONFIG == null || ZapHosting.CONFIG.common == null || ZapHosting.CONFIG.common.enableCustomJoinScreen;
         if (customScreen) {
-            ZHLoadingScreen.openAndConnect(this.screen, this.serverData.name, this.serverData.ip);
+            ZHLoadingScreen.openAndConnect(this.screen, this.publicServerData.name, this.publicServerData.ip);
         } else {
             ConnectScreen.startConnecting(
                     this.screen,
                     this.minecraft,
-                    ServerAddress.parseString(this.serverData.ip),
-                    this.serverData,
+                    ServerAddress.parseString(this.publicServerData.ip),
+                    this.publicServerData,
                     false,
                     null
             );
@@ -73,22 +80,22 @@ public class ZHPublicServerListEntry extends ZHEntryBase {
     }
 
     @Override
-    public boolean matchesEntry(ServerSelectionList.Entry other) {
-        return other instanceof ZHPublicServerListEntry;
+    public ServerData getServerData() {
+        return this.publicServerData;
     }
 
     private void ensurePingStarted() {
-        if (!this.pingStarted && this.serverData.state() == ServerData.State.INITIAL) {
+        if (!this.pingStarted && this.publicServerData.state() == ServerData.State.INITIAL) {
             this.pingStarted = true;
-            this.serverData.setState(ServerData.State.PINGING);
+            this.publicServerData.setState(ServerData.State.PINGING);
             CompletableFuture.runAsync(() -> {
                 try {
                     this.screen.getPinger().pingServer(
-                            this.serverData,
+                            this.publicServerData,
                             () -> {},
                             () -> {
-                                this.serverData.setState(
-                                        this.serverData.protocol == SharedConstants.getCurrentVersion().protocolVersion()
+                                this.publicServerData.setState(
+                                        this.publicServerData.protocol == SharedConstants.getCurrentVersion().protocolVersion()
                                                 ? ServerData.State.SUCCESSFUL
                                                 : ServerData.State.INCOMPATIBLE
                                 );
@@ -96,9 +103,9 @@ public class ZHPublicServerListEntry extends ZHEntryBase {
                             EventLoopGroupHolder.remote(this.minecraft.options.useNativeTransport())
                     );
                 } catch (UnknownHostException e) {
-                    this.serverData.setState(ServerData.State.UNREACHABLE);
+                    this.publicServerData.setState(ServerData.State.UNREACHABLE);
                 } catch (Exception e) {
-                    this.serverData.setState(ServerData.State.UNREACHABLE);
+                    this.publicServerData.setState(ServerData.State.UNREACHABLE);
                 }
             }, Util.backgroundExecutor());
         }
@@ -138,26 +145,26 @@ public class ZHPublicServerListEntry extends ZHEntryBase {
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, LOGO, iconX, iconY, 0, 0, 32, 32, 32, 32);
 
         // Config / Live data
-        String name = this.serverData.name != null ? this.serverData.name : "ZAP-Hosting Official Server";
+        String name = this.publicServerData.name != null ? this.publicServerData.name : "ZAP-Hosting Official Server";
 
         String motdFallback = (ZapHosting.CONFIG != null && ZapHosting.CONFIG.common != null && ZapHosting.CONFIG.common.publicServerMotd != null)
                 ? ZapHosting.CONFIG.common.publicServerMotd
                 : "Official Public Server hosted by ZAP-Hosting";
 
-        Component motdComponent = (this.serverData.motd != null && !this.serverData.motd.getString().trim().isEmpty())
-                ? this.serverData.motd
+        Component motdComponent = (this.publicServerData.motd != null && !this.publicServerData.motd.getString().trim().isEmpty())
+                ? this.publicServerData.motd
                 : Component.literal(motdFallback);
 
-        String ip = this.serverData.ip != null ? this.serverData.ip : "play.zap-hosting.com";
+        String ip = this.publicServerData.ip != null ? this.publicServerData.ip : "play.zap-hosting.com";
 
         int textX = iconX + 38;
         int rightEdge = rowLeft + rowWidth - 8;
-        ServerData.State state = this.serverData.state();
+        ServerData.State state = this.publicServerData.state();
 
         // --- LINE 1: Player count on top-right, Server Name + [OFFICIAL] on top-left ---
         String playerCountText = "";
-        if (this.serverData.players != null && (state == ServerData.State.SUCCESSFUL || state == ServerData.State.INCOMPATIBLE)) {
-            playerCountText = this.serverData.players.online() + "/" + this.serverData.players.max();
+        if (this.publicServerData.players != null && (state == ServerData.State.SUCCESSFUL || state == ServerData.State.INCOMPATIBLE)) {
+            playerCountText = this.publicServerData.players.online() + "/" + this.publicServerData.players.max();
         }
 
         int playerCountW = !playerCountText.isEmpty() ? this.minecraft.font.width(playerCountText) : 0;
@@ -224,8 +231,8 @@ public class ZHPublicServerListEntry extends ZHEntryBase {
         int hoverBottom = top + height;
         int hoverLeft = Math.min(statusX, playerCountX) - 4;
         if (hovering && mouseX >= hoverLeft && mouseX <= rightEdge + 4 && mouseY >= hoverTop && mouseY <= hoverBottom) {
-            if (state == ServerData.State.SUCCESSFUL && this.serverData.ping >= 0) {
-                guiGraphics.setTooltipForNextFrame(Component.literal("Ping: " + this.serverData.ping + " ms"), mouseX, mouseY);
+            if (state == ServerData.State.SUCCESSFUL && this.publicServerData.ping >= 0) {
+                guiGraphics.setTooltipForNextFrame(Component.literal("Ping: " + this.publicServerData.ping + " ms"), mouseX, mouseY);
             } else if (state == ServerData.State.UNREACHABLE) {
                 guiGraphics.setTooltipForNextFrame(Component.literal("Server unreachable"), mouseX, mouseY);
             } else if (state == ServerData.State.PINGING || state == ServerData.State.INITIAL) {
