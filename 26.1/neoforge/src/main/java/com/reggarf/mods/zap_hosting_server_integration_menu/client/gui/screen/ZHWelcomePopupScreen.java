@@ -222,7 +222,6 @@ public class ZHWelcomePopupScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        this.extractBackground(graphics, mouseX, mouseY, partialTick);
 
         int cardW = Math.min(360, this.width - 24);
         int cardH = Math.min(256, this.height - 24);

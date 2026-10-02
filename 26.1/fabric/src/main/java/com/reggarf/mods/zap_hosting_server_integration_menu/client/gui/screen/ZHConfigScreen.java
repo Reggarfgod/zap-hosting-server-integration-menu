@@ -371,7 +371,6 @@ public class ZHConfigScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractBackground(graphics, mouseX, mouseY, partialTick);
 
         int centerX = this.width / 2;
 
