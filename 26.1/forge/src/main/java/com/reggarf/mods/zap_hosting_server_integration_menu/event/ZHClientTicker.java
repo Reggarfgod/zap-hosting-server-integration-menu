@@ -16,7 +16,7 @@ public class ZHClientTicker {
     private static volatile int delayTicks = 0;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTick(TickEvent.ClientTickEvent.Post event) {
         if (!pendingWelcomeScreen) {
             return;
         }

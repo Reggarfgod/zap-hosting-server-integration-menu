@@ -5,7 +5,7 @@ import com.reggarf.mods.zap_hosting_server_integration_menu.config.ZHConfig;
 import com.reggarf.mods.zap_hosting_server_integration_menu.event.ZHMessageHandler;
 import com.reggarf.mods.zap_hosting_server_integration_menu.network.ZHWelcomePopupPayload;
 import net.minecraft.resources.Identifier;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.ChannelBuilder;
@@ -39,7 +39,7 @@ public class ZapHosting {
                 })
                 .add();
 
-        MinecraftForge.EVENT_BUS.register(ZHMessageHandler.class);
+        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(ZHMessageHandler::onPlayerLoggedIn);
 
         if (FMLEnvironment.dist.isClient()) {
             ZHClientSetup.initClient();

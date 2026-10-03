@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+MixinConfigs: zap_hosting_server_integration_menu.mixins.json

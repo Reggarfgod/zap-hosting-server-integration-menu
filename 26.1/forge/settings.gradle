@@ -1,0 +1,28 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = 'https://maven.minecraftforge.net/' }
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'zap-hosting-server-integration-menu-forge-26.1'
+
+// Automatically load properties from root gradle.properties
+gradle.beforeProject { p ->
+    def rootPropsFile = new File(settingsDir.parentFile.parentFile, 'gradle.properties')
+    if (rootPropsFile.exists()) {
+        def props = new Properties()
+        rootPropsFile.withInputStream { props.load(it) }
+        props.each { k, v ->
+            if (!p.hasProperty(k)) {
+                p.ext.set(k, v)
+            }
+        }
+    }
+}

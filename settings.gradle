@@ -30,4 +30,3 @@ include '1.21.1:forge'
 // 26.1 and above
 include '26.1:neoforge'
 include '26.1:fabric'
-include '26.1:forge'
