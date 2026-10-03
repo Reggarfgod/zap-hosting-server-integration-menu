@@ -44,9 +44,11 @@ repositories {
     }
 }
 
+def mcVersionForge = project.findProperty('minecraft_version_26_forge') ?: '26.1'
+def forgeVersion = project.forge_version_26
 def neoforgeArtifacts = "${project(':26.1:neoforge').projectDir}/build/moddev/artifacts"
-def forgeCache = "${System.getProperty('user.home')}/.gradle/caches/forge_gradle/maven_downloader/net/minecraftforge/forge/${minecraft_version_26}-${forge_version_26}"
-def forgeMcRepo = "${System.getProperty('user.home')}/.gradle/caches/forge_gradle/minecraft_repo/versions/${minecraft_version_26}"
+def forgeCache = "${System.getProperty('user.home')}/.gradle/caches/forge_gradle/maven_downloader/net/minecraftforge/forge/${mcVersionForge}-${forgeVersion}"
+def forgeMcRepo = "${System.getProperty('user.home')}/.gradle/caches/forge_gradle/minecraft_repo/versions/${mcVersionForge}"
 
 dependencies {
     // 26.1 Deobfuscated Minecraft jar for compilation
@@ -61,7 +63,7 @@ dependencies {
         runtimeOnly files("${System.getProperty('user.home')}/.gradle/caches/neoformruntime/artifacts/minecraft_26.1.2_client.jar")
     }
 
-    // Minecraft 26.1.2 Core Libraries
+    // Minecraft 26.1 Core Libraries
     implementation 'com.mojang:authlib:7.0.63'
     implementation 'com.mojang:datafixerupper:9.0.19'
     implementation 'com.mojang:brigadier:1.3.10'
@@ -134,10 +136,10 @@ dependencies {
     implementation 'net.minecraftforge:bootstrap:2.1.8'
     implementation 'net.minecraftforge:bootstrap-api:2.1.8'
     implementation 'net.minecraftforge:modlauncher:10.2.6'
-    implementation "net.minecraftforge:fmlloader:${minecraft_version_26}-${forge_version_26}"
-    implementation "net.minecraftforge:fmlcore:${minecraft_version_26}-${forge_version_26}"
-    implementation "net.minecraftforge:javafmllanguage:${minecraft_version_26}-${forge_version_26}"
-    implementation "net.minecraftforge:mclanguage:${minecraft_version_26}-${forge_version_26}"
+    implementation "net.minecraftforge:fmlloader:${mcVersionForge}-${forgeVersion}"
+    implementation "net.minecraftforge:fmlcore:${mcVersionForge}-${forgeVersion}"
+    implementation "net.minecraftforge:javafmllanguage:${mcVersionForge}-${forgeVersion}"
+    implementation "net.minecraftforge:mclanguage:${mcVersionForge}-${forgeVersion}"
     implementation "net.minecraftforge:forgespi:8.0.0"
     implementation "net.minecraftforge:eventbus:7.0.5"
     implementation "net.minecraftforge:securemodules:2.2.24"
@@ -146,8 +148,8 @@ dependencies {
     implementation "com.electronwill.night-config:core:3.7.4"
 
     // Forge 26.1 Universal
-    if (file("${forgeCache}/forge-${minecraft_version_26}-${forge_version_26}-universal.jar").exists()) {
-        implementation files("${forgeCache}/forge-${minecraft_version_26}-${forge_version_26}-universal.jar")
+    if (file("${forgeCache}/forge-${mcVersionForge}-${forgeVersion}-universal.jar").exists()) {
+        implementation files("${forgeCache}/forge-${mcVersionForge}-${forgeVersion}-universal.jar")
     } else {
         implementation "net.minecraftforge:forge:1.21.1-52.1.0:universal"
     }
@@ -191,7 +193,7 @@ tasks.register('runClient', JavaExec) {
     args = [
         '--launchTarget', 'forge_dev_client',
         '--launchEntry', 'net.minecraft.client.main.Main',
-        '--version', project.minecraft_version_26,
+        '--version', mcVersionForge,
         '--assetIndex', '30',
         '--assetsDir', "${System.getProperty('user.home')}/.gradle/caches/neoformruntime/assets"
     ]
